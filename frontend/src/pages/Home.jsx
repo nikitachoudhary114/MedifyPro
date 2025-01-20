@@ -1,11 +1,19 @@
-import React from 'react'
+import React from "react";
+import Header from "../components/Header";
+import BottomPanel from "../components/BottomPanel";
+import SpecialityOption from "../components/SpecialityOption";
+import DisplayDoctor from "../components/DisplayDoctor";
+
 
 const Home = () => {
   return (
-    <div className=''>Home
+    <>
+      <Header />
+      <SpecialityOption/>
       
-    </div>
-  )
-}
+      <BottomPanel/>
+    </>
+  );
+};
 
-export default Home
+export default Home;

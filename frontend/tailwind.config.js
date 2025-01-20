@@ -23,7 +23,7 @@ export default {
           "base-100": "#ffffff",
         },
         dark: {
-          primary: "#4b5563", // Grayish primary for dark mode
+          primary: "#b1b1b1", // Grayish primary for dark mode
           secondary: "#f59e0b", // Whiteish for secondary in dark mode
           border: "#f3f4f6",
           neutral: "#1e293b",
