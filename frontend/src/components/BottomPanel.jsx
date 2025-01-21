@@ -4,7 +4,7 @@ import { assets } from "../assets/assets";
 const BottomPanel = () => {
   return (
     <div className="px-4">
-      <div className="bg-custom-bg w-full sm:h-auto flex flex-col items-center justify-center md:justify-between md:flex-row my-20 rounded-2xl gap-4">
+      <div className="bg-custom-bg w-full sm:h-auto flex flex-col items-center justify-center md:justify-between md:flex-row mt-20 rounded-2xl gap-4">
         {/* -----left----- */}
         <div className="">
           <h1 className="text-white font-bold text-2xl sm:text-2xl md:text-3xl ml-0 md:ml-12 mt-4 md:mt-0">

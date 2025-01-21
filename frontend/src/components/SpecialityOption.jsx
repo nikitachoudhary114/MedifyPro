@@ -25,7 +25,7 @@ const SpecialityOption = () => {
           your appointment hassle-free.
         </p>
       </div>
-      <div className="flex gap-8 justify-center my-14">
+      <div className="flex flex-wrap gap-8 justify-center my-14">
         {specialityData.map((doc, ind) => (
           <div
             onClick={() => setData(doc.speciality)}
