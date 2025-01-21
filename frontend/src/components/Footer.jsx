@@ -3,7 +3,7 @@ import { assets } from "../assets/assets";
 
 const Footer = () => {
   return (
-    <div className="mt-44">
+    <div className="mt-32">
       <div className="flex flex-col md:flex-row gap-10 md:gap-32 border-b pb-8 border-b-gray-200 px-6">
         {/* Left Section */}
         <div>

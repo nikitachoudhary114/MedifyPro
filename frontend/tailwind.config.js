@@ -19,15 +19,17 @@ export default {
           primary: "#6b7280", // Grayish for primary
           secondary: "#1f2937", // Blackish for secondary
           border: "#6b7280",
-          neutral: "#3d4451",
+          neutral: "#000000",
           "base-100": "#ffffff",
+          "simple": "#000000"
         },
         dark: {
           primary: "#b1b1b1", // Grayish primary for dark mode
           secondary: "#f59e0b", // Whiteish for secondary in dark mode
           border: "#f3f4f6",
-          neutral: "#1e293b",
+          neutral: "#eeeeee",
           "base-100": "#0f172a",
+          "simple": ""
         },
       },
     ],
