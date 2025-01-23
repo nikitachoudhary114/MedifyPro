@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [dark, setDark] = useState(false); // Default to light mode
-
+  const navigate = useNavigate();
   useEffect(() => {
     // Set the initial theme to light mode
     document.documentElement.setAttribute("data-theme", "light");
@@ -77,7 +78,7 @@ const Navbar = () => {
         </div>
         <div className="flex gap-2">
           <div>
-            <button className="bg-custom-bg p-2 px-4 rounded-full text-white font-light hidden md:block">
+            <button onClick={()=> navigate('/login')} className="bg-custom-bg p-2 px-4 rounded-full text-white font-light hidden md:block">
               Create Account
             </button>
           </div>
