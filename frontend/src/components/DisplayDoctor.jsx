@@ -1,15 +1,22 @@
 import React, { useState } from 'react'
 import { doctors } from '../assets/assets';
+import { useNavigate } from 'react-router-dom';
 
-const DisplayDoctor = ({ speciality }) => {
+const DisplayDoctor = ({speciality}) => {
   const [number, setNumber] = useState(10);
+  const navigate = useNavigate();
 
+  const handleCardClick = (doc) => {
+    navigate(`/doctors/${doc._id}`)
+  }
 
   return (
     <>
       <div className="flex flex-wrap justify-center items-start gap-5  ">
         {doctors.slice(0, number).map((doc, ind) => (
-          <div key={ind} className="border border-gray-300 rounded-xl">
+          <div key={ind}
+            onClick={()=> handleCardClick(doc)}
+            className="border border-gray-300 rounded-xl">
             <div className="w-48 ">
               <img
                 className="bg-[#eaefff] h-[60%] rounded-t-lg"

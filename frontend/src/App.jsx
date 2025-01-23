@@ -7,6 +7,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Doctors from "./pages/Doctors";
 import Footer from "./components/Footer";
+import DoctorInfo from "./components/DoctorInfo";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,7 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/doctors" element={<Doctors />} />
-            <Route path="/doctors/:id" element={<Doctors />} />
+            <Route path="/doctors/:id" element={<DoctorInfo />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
            

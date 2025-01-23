@@ -9,9 +9,9 @@ const SpecialityOption = () => {
         setSpeciality(data)
         
     }
-     useEffect(() => {
-       console.log(speciality); 
-     }, [speciality]);
+    //  useEffect(() => {
+    //    console.log(speciality); 
+    //  }, [speciality]);
     
   return (
     <div>

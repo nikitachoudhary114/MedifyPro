@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { doctors, specialityData } from '../assets/assets'
+import { useNavigate } from 'react-router-dom';
 
 const Doctors = () => {
   const [category, setCategory] = useState('all');
+  const navigate = useNavigate();
+  
   const changeCategory = (speciality ) => (
     setCategory((prevCategory) => prevCategory === speciality ? 'all' : speciality)
   )
+
+
+    const handleCardClick = (doc) => {
+      navigate(`/doctors/${doc._id}`);
+  };
+  
+
   // useEffect(() => {
   //   console.log(category)
   // }), [category]
@@ -20,7 +30,11 @@ const Doctors = () => {
           <button
             onClick={() => changeCategory("General physician")}
             className={` px-8 py-2 hover:text-black border rounded-lg hover:bg-indigo-100 hover:border-zinc-300 
-              ${category === "General physician" ? "bg-indigo-50 text-black" : ""}`}
+              ${
+                category === "General physician"
+                  ? "bg-indigo-50 text-black"
+                  : ""
+              }`}
           >
             General physician
           </button>
@@ -35,14 +49,18 @@ const Doctors = () => {
           <button
             onClick={() => changeCategory("Dermatologist")}
             className={`px-8 py-2 hover:text-black border rounded-lg hover:bg-indigo-100 hover:border-zinc-300
-               ${category === "Dermatologist" ? "bg-indigo-50  text-black" : ""}`}
+               ${
+                 category === "Dermatologist" ? "bg-indigo-50  text-black" : ""
+               }`}
           >
             Dermatologist
           </button>
           <button
             onClick={() => changeCategory("")}
             className={`px-8 py-2 hover:text-black border rounded-lg hover:bg-indigo-100 hover:border-zinc-300
-               ${category === "Pediatricians" ? "bg-indigo-50  text-black" : ""}`}
+               ${
+                 category === "Pediatricians" ? "bg-indigo-50  text-black" : ""
+               }`}
           >
             Pediatricians
           </button>
@@ -56,7 +74,11 @@ const Doctors = () => {
           <button
             onClick={() => changeCategory("Gastroenterologist")}
             className={`px-8 py-2 hover:text-black border rounded-lg hover:bg-indigo-100 hover:border-zinc-300
-               ${category === "Gastroenterologist" ? "bg-indigo-50  text-black" : ""}`}
+               ${
+                 category === "Gastroenterologist"
+                   ? "bg-indigo-50  text-black"
+                   : ""
+               }`}
           >
             Gastroenterologist
           </button>
@@ -69,7 +91,11 @@ const Doctors = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8 mx-auto items-start">
               {filteredDoctors.map((doc, ind) => (
-                <div key={ind} className="border border-gray-300 rounded-xl">
+                <div
+                  key={ind}
+                  onClick={() => handleCardClick(doc)}
+                  className="border border-gray-300 rounded-xl"
+                >
                   <div className="w-48">
                     <img
                       className="bg-[#eaefff] h-[60%] rounded-t-lg"
