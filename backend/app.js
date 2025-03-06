@@ -1,13 +1,14 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const app = express();
-const dotenv = require('dotenv');
-const cors = require('cors');
-const { connectDB } = require('./util/db');
-const { default: userRouter } = require('./routes/userRoutes');
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import { connectDB } from './util/db.js';  // Add .js extension
+import userRouter from './routes/userRoutes.js'; // Import directly
+
 dotenv.config();
 
-const port = process.env.PORT || 3000;
+const app = express();
+const port = process.env.PORT || 8080;
 
 connectDB();
 
@@ -15,11 +16,11 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-    res.send("hii")
-})
+    res.send("hii");
+});
 
 app.use('/api/user', userRouter);
 
 app.listen(port, () => {
-    console.log(`Server listening to port ${port}`)
-})
+    console.log(`Server listening to port ${port}`);
+});

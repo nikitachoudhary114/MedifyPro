@@ -9,6 +9,9 @@ import Doctors from "./pages/Doctors";
 import Footer from "./components/Footer";
 import DoctorInfo from "./components/DoctorInfo";
 import Login from "./pages/Login";
+import Appointment from "./pages/Appointment";
+import Profile from "./pages/Profile";
+import SignUp from "./pages/SignUp";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -28,6 +31,9 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/appointment" element={<Appointment/> } />
+            <Route path="/profile" element={<Profile/> } />
            
           </Routes>
         </div>

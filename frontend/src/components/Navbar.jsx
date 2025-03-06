@@ -1,11 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
-  const [dark, setDark] = useState(false); // Default to light mode
+  const [dark, setDark] = useState(false); 
+  const [token, setToken] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
   const navigate = useNavigate();
+
+  function dropdownToggle() {
+    setDropdown(!dropdown);
+  }
+  
+  useEffect(() => {
+    
+      const storedToken = localStorage.getItem("token");
+    if (storedToken) { setToken(true); } 
+  
+  },[])
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("token");
+      toast.success("Logout Success");
+      setToken(false);
+      navigate("/");
+    } catch (error) {
+      toast.error("Logout Failed");
+    }
+  }
+
   useEffect(() => {
     // Set the initial theme to light mode
     document.documentElement.setAttribute("data-theme", "light");
@@ -76,11 +102,48 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3 items-center">
           <div>
-            <button onClick={()=> navigate('/login')} className="bg-custom-bg p-2 px-4 rounded-full text-white font-light hidden md:block">
-              Create Account
-            </button>
+            {!token ? (
+              <button
+                onClick={() => navigate("/login")}
+                className="bg-custom-bg p-2 px-4 rounded-full text-white font-light hidden md:block"
+              >
+                Create Account
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 relative">
+                <img
+                  src={assets.profile_pic}
+                  alt=""
+                  className="w-12 rounded-full"
+                />
+                <img
+                  onClick={dropdownToggle}
+                  src={assets.dropdown_icon}
+                  alt=""
+                />
+                {dropdown ? (
+                  <div className="bg-gray-100 p-4 absolute top-16 right-[0px] mt-2 w-40">
+                    <Link to="/appointment">
+                      <h2 className="pb-1 text-base font-normal ">
+                        My Appointments
+                      </h2>
+                    </Link>
+                    <Link to="/profile">
+                      <h2 className="py-1 text-base font-normal ">
+                        My Profile
+                      </h2>
+                    </Link>
+                    <div onClick={handleLogout}>
+                      <h2 className="py-1 text-base font-normal cursor-pointer ">Logout</h2>
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
+            )}
           </div>
           <button onClick={toggleTheme}>
             {dark ? (

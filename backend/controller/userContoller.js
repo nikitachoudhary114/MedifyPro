@@ -10,7 +10,7 @@ const loginUser = async (req, res) => {
         if (!user) {
             return res.json({ success: false, message: "User doesn't exist" })
         }
-        const isMatch = await bcrypt.isMatch(user.password, password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.json({success:false, message:"Invalid Credentials"})
         }
@@ -40,11 +40,11 @@ const registerUser = async (req, res) => {
             return res.json({success:false, message:"Please enter valid E-mail"})
         }
         if (password.length < 8) {
-           return res.json({success:false, message:"Please enter a password with 8+ charachters"})
+           return res.json({success:false, message:"Please enter a password with 8+ characters"})
         }
 
         // salt and hashing
-        const salt = await bcrypt.salt(10);
+        const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // save in db and create token
@@ -68,4 +68,17 @@ const registerUser = async (req, res) => {
 
 }
 
-export {loginUser, registerUser}
+
+const logoutUser = (req, res) => {
+    try { 
+        return res.status(200).json({ message: "User logged out successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error logging out", error });
+    }
+};
+
+
+
+export {
+    loginUser, registerUser, logoutUser
+}
