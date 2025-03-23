@@ -1,17 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { assets } from "../assets/assets";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 const Profile = () => {
-  const [name, setName] = useState("Edward Vincent");
-  const [email, setEmail] = useState("nikitachoudhary364@gmail.com");
-  const [phone, setPhone] = useState("+91 8411014247");
-  const [address1Line, setAddress1Line] = useState("57th Cross, Richmond");
-  const [address2Line, setAddress2Line] = useState(
-    "Circle, Church Road, London, United Kingdom - 567890"
-  );
-  const [gender, setGender] = useState("Male");
-  const [dob, setDob] = useState("27 April 2005");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+
+ 
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/user/profile", {
+         
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, 
+          },
+        });
+
+       if (response.data.success) {
+         const user = response.data.user;
+         setName(user.name || "");
+         setEmail(user.email || "");
+         setPhone(user.phone || "");
+         setAddress(user.address?.split(",")[0] || "");
+         setGender(user.gender || "");
+         setDob(user.dob || "");
+       } else {
+         toast.error("Failed to load profile data");
+       }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        toast.error("An error occurred while fetching the profile data");
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+
+
+  const editProfileData = async () => {
+    try {
+      const res = await axios.put("http://localhost:8080/api/user/profile", {
+        name,
+        email,
+        phone,
+        address,
+        dob,
+        gender
+      }
+      , {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        });
+      
+      if (res.data.success) {
+        toast.success("Profile data updated successfully");
+        setIsEditing(false);
+      } else {
+        toast.error("Failed to update profile data");
+        
+      }
+    } catch (error) {
+      console.error("Error updating profile data:", error);
+      toast.error("An error occurred while updating the profile data");
+      
+    }
+  }
 
   const toggleEdit = () => setIsEditing(!isEditing);
 
@@ -23,9 +88,8 @@ const Profile = () => {
       </div>
 
       <div className="mb-6">
-        {/* <h2 className=""></h2> */}
         <input
-          className={`outline-none text-2xl my-3 font-semibold  ${
+          className={`outline-none text-2xl my-3 font-semibold ${
             isEditing ? "bg-gray-50" : "bg-transparent"
           }`}
           id="name"
@@ -54,7 +118,7 @@ const Profile = () => {
         <div className="flex gap-16 mb-2">
           <label htmlFor="phone">Phone:</label>
           <input
-            className={`outline-none  ${
+            className={`outline-none ${
               isEditing ? "bg-gray-50" : "bg-transparent"
             }`}
             id="phone"
@@ -74,20 +138,11 @@ const Profile = () => {
               }`}
               id="address1"
               type="text"
-              value={address1Line}
-              onChange={(e) => setAddress1Line(e.target.value)}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               disabled={!isEditing}
             />
-            <input
-              className={`outline-none w-full break-words ${
-                isEditing ? "bg-gray-50" : "bg-transparent"
-              }`}
-              id="address2"
-              type="text"
-              value={address2Line}
-              onChange={(e) => setAddress2Line(e.target.value)}
-              disabled={!isEditing}
-            />
+          
           </div>
         </div>
       </div>
@@ -115,7 +170,7 @@ const Profile = () => {
               isEditing ? "bg-gray-50" : "bg-transparent"
             }`}
             id="dob"
-            type="text"
+            type="date"
             value={dob}
             onChange={(e) => setDob(e.target.value)}
             disabled={!isEditing}
@@ -130,21 +185,15 @@ const Profile = () => {
         >
           {isEditing ? "Cancel" : "Edit"}
         </button>
-        {isEditing ? (
+        {isEditing && (
           <button
             onClick={() => {
-              setIsEditing(false);
-              alert("Information Saved!");
+              editProfileData();
             }}
-            className={`border rounded-full p-4 border-custom-bg hover:bg-slate-50 ${
-              !isEditing ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="border rounded-full p-4 border-custom-bg hover:bg-slate-50"
           >
             Save Information
           </button>
-        
-        ) : (
-          ""
         )}
       </div>
     </div>
