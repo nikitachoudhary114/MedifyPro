@@ -68,8 +68,8 @@ const addDoctor = async (req, res) => {
 
 const getDocById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const doc = await doctorModel.findById(id);
+    const { doctorId } = req.params;
+    const doc = await doctorModel.findById(doctorId);
     // console.log(req);
     res.status(201).json({ success: true, doctor: doc });
   } catch (error) {
@@ -80,10 +80,10 @@ const getDocById = async (req, res) => {
 
 const updateDocProfile = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { doctorId } = req.params;
     const updatedData = req.body;
 
-    const doc = await doctorModel.findByIdAndUpdate(id, updatedData, {
+    const doc = await doctorModel.findByIdAndUpdate(doctorId, updatedData, {
       new: true,
       runValidators: true,
     });
@@ -111,8 +111,8 @@ const updateDocProfile = async (req, res) => {
 
 const updateDoctorAvailabity = async (req, res) => {
   try {
-    const { id } = req.params;
-    const doc = await doctorModel.findById(id);
+    const { doctorId } = req.params;
+    const doc = await doctorModel.findById(doctorId);
 
     if (!doc) {
       return res
@@ -133,8 +133,8 @@ const updateDoctorAvailabity = async (req, res) => {
 
 const getDoctorAvailability = async (req, res) => {
   try {
-    const { id } = req.params;
-    const doc = await doctorModel.findById(id);
+    const { doctorId } = req.params;
+    const doc = await doctorModel.findById(doctorId);
 
     if (!doc) {
       return res
@@ -151,11 +151,136 @@ const getDoctorAvailability = async (req, res) => {
   }
 }
 
+const addReview = async (req, res) => {
+  try {
+    const { userId, review, rating } = req.body;
+    const { doctorId } = req.params;
+
+    const doctor =await doctorModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+    const newRating ={
+      userId, rating, review
+    }
+    doctor.reviews.push(newRating);
+    
+    await doctor.save();
+
+    res.status(200).json({message:"new review added", doctor})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
+const getReview = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const docReviews =await doctorModel.findById(doctorId).select("reviews");
+    if (!docReviews) {
+      return res.status(400).json({ message: "No reviews found" })
+    }
+    res.status(200).json({ message: "all reviews",reviews: docReviews.reviews })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
+const updatReview = async (req, res) => {
+  try {
+    const { doctorId,  reviewId } = req.params;
+    const { review, rating } = req.body;
+    if (!review || !rating) {
+      return res.status(400).json({ message: "all fields are required" })
+    }
+
+    const doctor = await doctorModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const reviewToUpdate = doctor.reviews.id(reviewId);
+
+    if (!reviewToUpdate) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    reviewToUpdate.review = review;
+    reviewToUpdate.rating = rating;
+    
+    await doctor.save();
+
+    res.status(200).json({ message: "Review updated successfully", doctor });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
+const deleteReview = async (req, res) => {
+  try {
+    const { doctorId, reviewId } = req.params;
+    const doctor = await doctorModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const initialReviewCount = doctor.reviews.length;
+    doctor.reviews = doctor.reviews.filter((rev) => rev._id.toString() !== reviewId);
+
+    if (doctor.reviews.length === initialReviewCount) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+   
+    await doctor.save();
+
+    res.status(200).json({ message: "Review deleted successfully", doctor });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
+const avgRating = async(req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const doctor = await doctorModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    if (doctor.reviews.length === 0) {
+      return res.status(200).json({message: "No reviews available"})
+    }
+
+    const totalRating = doctor.reviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = totalRating / doctor.reviews.length;
+
+
+    res.status(200).json({ message: "Average rating", data: averageRating.toFixed(1) });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+
+}
+
 export {
   getAllDoctors,
   addDoctor,
   getDocById,
   updateDocProfile,
   updateDoctorAvailabity,
-  getDoctorAvailability
+  getDoctorAvailability,
+  addReview,
+  getReview,
+  updatReview,
+  deleteReview,
+  avgRating
 };
