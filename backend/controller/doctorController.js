@@ -87,20 +87,75 @@ const updateDocProfile = async (req, res) => {
       new: true,
       runValidators: true,
     });
-      
-      if (!doc) {
-          res.status(200).json({success:false, message: "Doctor not found" });
+
+    if (!doc) {
+      res.status(200).json({ success: false, message: "Doctor not found" });
     }
-      res.status(200).json({success:true, message: "Doctor Profile Updated Successfully", doctor: doc });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Doctor Profile Updated Successfully",
+        doctor: doc,
+      });
   } catch (error) {
-      console.log(error);
+    console.log(error);
 
-      if (error.kind === "ObjectId") {
-          res.status(400).json({success:false, message: "Invalid Doctor ID" });
-      }
+    if (error.kind === "ObjectId") {
+      res.status(400).json({ success: false, message: "Invalid Doctor ID" });
+    }
 
-      res.status(500).json({success:false, message: "Server Error" });
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-export { getAllDoctors, addDoctor, getDocById, updateDocProfile };
+const updateDoctorAvailabity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doc = await doctorModel.findById(id);
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor Not Found" });
+    }
+
+    doc.availability = !doc.availability;
+
+    await doc.save();
+
+    res.status(200).json({ message: "Doctor availability updated successfully", doctor: doc });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error", error });
+  }
+};
+
+const getDoctorAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doc = await doctorModel.findById(id);
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor Not Found" });
+    }
+
+    const available = doc.availability;
+    res.status(200).json({ success: true, available });
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: "Server Error"})
+  }
+}
+
+export {
+  getAllDoctors,
+  addDoctor,
+  getDocById,
+  updateDocProfile,
+  updateDoctorAvailabity,
+  getDoctorAvailability
+};

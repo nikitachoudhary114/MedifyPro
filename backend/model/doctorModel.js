@@ -13,6 +13,7 @@ const doctorSchema = new mongoose.Schema({
     experience: { type: String, default: "" },
     about: { type: String, default: "" },
     timing: { type: String, default: "" },
+    availability: {type:Boolean, default:false}
 })
 const doctorModel = mongoose.model('doctor', doctorSchema);
 export default doctorModel;
