@@ -271,6 +271,57 @@ const avgRating = async(req, res) => {
 
 }
 
+const search = async (req, res) => {
+  try {
+    const { name, speciality } = req.body;
+    const query = {};
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+    if (speciality) {
+      query.speciality = { $regex: speciality, $options: "i" };
+    }
+    const doctors = await doctorModel.find(query);
+    if (!doctors) {
+      res.status(404).json({ message: "No doctors found" });
+    }
+    res.status(200).json({success: true, data: doctors})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
+const filter = async (req, res) => {
+  try {
+    const { rating, maxFees, availability } = req.body;
+
+    const query = {};
+
+    if (rating) {
+      query["reviews.rating"] = { $gte: rating };
+    }
+
+    if (maxFees) {
+      query.fees = { $lte: maxFees };
+    }
+
+    if (availability !== undefined) {
+      query.availability = availability;
+    }
+
+    const doctors = await doctorModel.find(query);
+    if (doctors.length === 0) {
+      return res.status(404).json({ message: "No doctors found matching the criteria" });
+    }
+
+    res.status(200).json({ success: true, data: doctors });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" })
+  }
+}
+
 export {
   getAllDoctors,
   addDoctor,
@@ -282,5 +333,7 @@ export {
   getReview,
   updatReview,
   deleteReview,
-  avgRating
+  avgRating,
+  search,
+  filter
 };
