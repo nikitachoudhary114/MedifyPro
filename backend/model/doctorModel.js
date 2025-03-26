@@ -8,13 +8,13 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const doctorSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    name: { type: String },
+    email: { type: String, unique: true },
+    password: { type: String },
     speciality: {
         type: String,
         enum: ["General Physician", "Gynecologist", "Dermatologist", "Pediatricians", "Neurologist", "Gastroenterologist"],
-        required: true
+       
     },
     phone: { type: String, default: "" },
     address: { type: String, default: "" },

@@ -1,22 +1,42 @@
 import express from "express";
-import { addDoctor, addReview, avgRating, deleteReview, getAllDoctors, getDocById, getDoctorAvailability, updateDocProfile, updateDoctorAvailabity,getReview, updatReview, filter } from "../controller/doctorController.js";
+import {auth} from '../middleware/auth.js'
+import {
+  addDoctor,
+  addReview,
+  avgRating,
+  deleteReview,
+  getAllDoctors,
+  getDocById,
+  getDoctorAvailability,
+  updateDocProfile,
+  updateDoctorAvailabity,
+  getReview,
+  updatReview,
+  filter,
+  deleteDoctor,
+  signUp,
+  login,
+  logout,
+} from "../controller/doctorController.js";
 const doctorRoutes = express.Router();
 
+doctorRoutes.post("/signup", signUp);
+doctorRoutes.post("/login", login);
+doctorRoutes.post("/logout", logout);
 
-doctorRoutes.post("/add", addDoctor);
-doctorRoutes.get("/all", getAllDoctors);
-doctorRoutes.get('/:doctorId', getDocById);
-doctorRoutes.put('/:doctorId/', updateDocProfile);
-doctorRoutes.post('/:doctorId/available', updateDoctorAvailabity);
-doctorRoutes.get('/:doctorId/available', getDoctorAvailability);
+doctorRoutes.post("/add",auth, addDoctor);
+doctorRoutes.get("/all", auth, getAllDoctors);
+doctorRoutes.get("/:doctorId", getDocById);
+doctorRoutes.delete("/:doctorId", auth, deleteDoctor);
+doctorRoutes.put("/:doctorId/", auth, updateDocProfile);
+doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);
+doctorRoutes.get("/:doctorId/available", getDoctorAvailability);
 
 //reviews
-doctorRoutes.post('/:doctorId/review', addReview);
-doctorRoutes.get('/:doctorId/review',getReview);
-doctorRoutes.patch('/:doctorId/review/:reviewId', updatReview);
-doctorRoutes.delete('/:doctorId/review/:reviewId', deleteReview);
-doctorRoutes.get('/:doctorId/average-rating', avgRating);
-
-
+doctorRoutes.post("/:doctorId/review", auth, addReview);
+doctorRoutes.get("/:doctorId/review", auth, getReview);
+doctorRoutes.patch("/:doctorId/review/:reviewId", auth, updatReview);
+doctorRoutes.delete("/:doctorId/review/:reviewId", auth, deleteReview);
+doctorRoutes.get("/:doctorId/average-rating", avgRating);
 
 export default doctorRoutes;

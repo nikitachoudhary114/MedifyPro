@@ -1,4 +1,7 @@
+import bcrypt from "bcryptjs/dist/bcrypt.js";
 import doctorModel from "../model/doctorModel.js";
+import validator from "validator";
+import jwt from "jsonwebtoken";
 
 const getAllDoctors = async (req, res) => {
   try {
@@ -26,6 +29,7 @@ const addDoctor = async (req, res) => {
       about,
       timing,
     } = req.body;
+
     if (
       !name ||
       !email ||
@@ -39,8 +43,9 @@ const addDoctor = async (req, res) => {
       !about ||
       !timing
     ) {
-      res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
+
     const newDoc = new doctorModel({
       name,
       email,
@@ -49,11 +54,13 @@ const addDoctor = async (req, res) => {
       phone,
       address,
       fees,
+      image,
       degree,
       experience,
       about,
       timing,
     });
+
     await newDoc.save();
     res.status(201).json({
       success: true,
@@ -61,6 +68,12 @@ const addDoctor = async (req, res) => {
       doctor: newDoc,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate field error. Email already exists.",
+      });
+    }
     console.log(error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
@@ -91,13 +104,11 @@ const updateDocProfile = async (req, res) => {
     if (!doc) {
       res.status(200).json({ success: false, message: "Doctor not found" });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Doctor Profile Updated Successfully",
-        doctor: doc,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Doctor Profile Updated Successfully",
+      doctor: doc,
+    });
   } catch (error) {
     console.log(error);
 
@@ -124,7 +135,12 @@ const updateDoctorAvailabity = async (req, res) => {
 
     await doc.save();
 
-    res.status(200).json({ message: "Doctor availability updated successfully", doctor: doc });
+    res
+      .status(200)
+      .json({
+        message: "Doctor availability updated successfully",
+        doctor: doc,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error", error });
@@ -144,57 +160,60 @@ const getDoctorAvailability = async (req, res) => {
 
     const available = doc.availability;
     res.status(200).json({ success: true, available });
-    
   } catch (error) {
     console.log(error);
-    res.status(500).json({success:false, message: "Server Error"})
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
 const addReview = async (req, res) => {
   try {
     const { userId, review, rating } = req.body;
     const { doctorId } = req.params;
 
-    const doctor =await doctorModel.findById(doctorId);
+    const doctor = await doctorModel.findById(doctorId);
 
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
-    const newRating ={
-      userId, rating, review
-    }
+    const newRating = {
+      userId,
+      rating,
+      review,
+    };
     doctor.reviews.push(newRating);
-    
+
     await doctor.save();
 
-    res.status(200).json({message:"new review added", doctor})
+    res.status(200).json({ message: "new review added", doctor });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
 const getReview = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const docReviews =await doctorModel.findById(doctorId).select("reviews");
+    const docReviews = await doctorModel.findById(doctorId).select("reviews");
     if (!docReviews) {
-      return res.status(400).json({ message: "No reviews found" })
+      return res.status(400).json({ message: "No reviews found" });
     }
-    res.status(200).json({ message: "all reviews",reviews: docReviews.reviews })
+    res
+      .status(200)
+      .json({ message: "all reviews", reviews: docReviews.reviews });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
 const updatReview = async (req, res) => {
   try {
-    const { doctorId,  reviewId } = req.params;
+    const { doctorId, reviewId } = req.params;
     const { review, rating } = req.body;
     if (!review || !rating) {
-      return res.status(400).json({ message: "all fields are required" })
+      return res.status(400).json({ message: "all fields are required" });
     }
 
     const doctor = await doctorModel.findById(doctorId);
@@ -211,15 +230,15 @@ const updatReview = async (req, res) => {
 
     reviewToUpdate.review = review;
     reviewToUpdate.rating = rating;
-    
+
     await doctor.save();
 
     res.status(200).json({ message: "Review updated successfully", doctor });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
 const deleteReview = async (req, res) => {
   try {
@@ -231,22 +250,24 @@ const deleteReview = async (req, res) => {
     }
 
     const initialReviewCount = doctor.reviews.length;
-    doctor.reviews = doctor.reviews.filter((rev) => rev._id.toString() !== reviewId);
+    doctor.reviews = doctor.reviews.filter(
+      (rev) => rev._id.toString() !== reviewId
+    );
 
     if (doctor.reviews.length === initialReviewCount) {
       return res.status(404).json({ message: "Review not found" });
     }
-   
+
     await doctor.save();
 
     res.status(200).json({ message: "Review deleted successfully", doctor });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
-const avgRating = async(req, res) => {
+const avgRating = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const doctor = await doctorModel.findById(doctorId);
@@ -256,20 +277,23 @@ const avgRating = async(req, res) => {
     }
 
     if (doctor.reviews.length === 0) {
-      return res.status(200).json({message: "No reviews available"})
+      return res.status(200).json({ message: "No reviews available" });
     }
 
-    const totalRating = doctor.reviews.reduce((sum, review) => sum + review.rating, 0);
+    const totalRating = doctor.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
     const averageRating = totalRating / doctor.reviews.length;
 
-
-    res.status(200).json({ message: "Average rating", data: averageRating.toFixed(1) });
+    res
+      .status(200)
+      .json({ message: "Average rating", data: averageRating.toFixed(1) });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-
-}
+};
 
 const search = async (req, res) => {
   try {
@@ -285,12 +309,12 @@ const search = async (req, res) => {
     if (!doctors) {
       res.status(404).json({ message: "No doctors found" });
     }
-    res.status(200).json({success: true, data: doctors})
+    res.status(200).json({ success: true, data: doctors });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
 
 const filter = async (req, res) => {
   try {
@@ -312,15 +336,118 @@ const filter = async (req, res) => {
 
     const doctors = await doctorModel.find(query);
     if (doctors.length === 0) {
-      return res.status(404).json({ message: "No doctors found matching the criteria" });
+      return res
+        .status(404)
+        .json({ message: "No doctors found matching the criteria" });
     }
 
     res.status(200).json({ success: true, data: doctors });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-}
+};
+
+const deleteDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const doctor = await doctorModel.findByIdAndDelete(doctorId);
+    if (!doctor) {
+      res.status(404).json({ message: "No doctor Found" });
+    }
+    res.status(200).json({ message: "Doctor Deleted successfully", doctor });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "server error" });
+  }
+};
+
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET);
+};
+
+const signUp = async (req, res) => {
+  try {
+    const { email, name, password } = req.body;
+    if (!email || !name || !password) {
+      return res.status(400).json({ message: "all fields  are needed" });
+    }
+
+    const exists = await doctorModel.findOne({ email });
+
+    if (exists) {
+      return res
+        .status(409)
+        .json({
+          success:false,
+          message: "Doctor already exists with this email"
+        });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please enter a valid email" });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "please enter a password with 8+ characters",
+      });
+    }
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newDoctor = new doctorModel({
+      name: name,
+      email: email,
+      password: hashedPassword
+    });
+
+    const doctor = await newDoctor.save();
+    const token = createToken(doctor._id);
+
+    res.status(200).json({success: true, message: "Doctor registered", token})
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
+
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const doctor = await doctorModel.findOne({email});
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor does not exist"
+      })
+    }
+
+    const isMatch = await bcrypt.compare(password, doctor.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Invalid Credentials" });
+    }
+
+    const token = createToken(doctor._id);
+    res.status(200).json({ success: true, message: "Login Successful", token })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+ 
+};
+
+const logout = async (req, res) => {
+  try {
+    return res.status(200).json({ message: "Doctor logged out successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error logging out", error });
+  }
+};
 
 export {
   getAllDoctors,
@@ -335,5 +462,9 @@ export {
   deleteReview,
   avgRating,
   search,
-  filter
+  filter,
+  deleteDoctor,
+  signUp,
+  login,
+  logout,
 };
