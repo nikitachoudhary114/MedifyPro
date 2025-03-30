@@ -26,7 +26,7 @@ doctorRoutes.post("/logout", logout);
 
 doctorRoutes.post("/add",auth, addDoctor);
 doctorRoutes.get("/all", auth, getAllDoctors);
-doctorRoutes.get("/:doctorId", getDocById);
+doctorRoutes.get("/:doctorId",auth, getDocById);
 doctorRoutes.delete("/:doctorId", auth, deleteDoctor);
 doctorRoutes.put("/:doctorId/", auth, updateDocProfile);
 doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);
