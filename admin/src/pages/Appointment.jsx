@@ -42,7 +42,7 @@ const Appointment = () => {
   // Change appointment status
   const changeStatus = async (appointmentId, status) => {
     try {
-      const response = await axios.patch(
+      const response = await axios.put(
         `http://localhost:8080/api/appointments/${appointmentId}/status`,
         { status },
         {

@@ -87,9 +87,9 @@ const getProfile = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Unauthorized access" });
     }
-    console.log("User ID:", req.user.id);
+    // console.log("User ID:", req.user.id);
     const user = await userModel.findById(req.user.id);
-    console.log("User:", user);
+    // console.log("User:", user);
     if (!user) {
       return res
         .status(404)
