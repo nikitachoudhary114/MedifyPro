@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode"; // Use named import for jwt-decode
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const Profile = () => {
-  const [doctor, setDoctor] = useState(null); // Initialize as null
+  const [doctor, setDoctor] = useState(null);
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(false); // For availability toggle
 
-  // Decode the token to get the doctorId
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
-  const doctorId = decodedToken?.id; // Assuming the token payload contains `id` for doctorId
+  const doctorId = decodedToken?.id;
 
-  // Fetch doctor profile
   useEffect(() => {
     const fetchDoctorProfile = async () => {
       if (!doctorId) {
@@ -26,12 +26,13 @@ const Profile = () => {
           `http://localhost:8080/api/doctor/${doctorId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Include token for authentication
+              Authorization: `Bearer ${token}`,
             },
           }
         );
         setDoctor(response.data.doctor);
-        setFormData(response.data.doctor); // Pre-fill the form with fetched data
+        setFormData(response.data.doctor);
+        setIsAvailable(response.data.doctor.availability); // Set availability
       } catch (error) {
         console.error("Error fetching doctor profile:", error);
       }
@@ -40,12 +41,10 @@ const Profile = () => {
     fetchDoctorProfile();
   }, [doctorId, token]);
 
-  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission for updating profile
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -54,12 +53,12 @@ const Profile = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include token for authentication
+            Authorization: `Bearer ${token}`,
           },
         }
       );
       setDoctor(response.data.doctor);
-      setIsEditing(false); // Exit editing mode
+      setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -67,61 +66,141 @@ const Profile = () => {
     }
   };
 
-  // Render loading state if doctor data is not yet available
+  const toggleAvailability = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/doctor/${doctorId}/available`,
+        { isAvailable: !isAvailable },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setIsAvailable(response.data.isAvailable);
+      toast.success(
+        `Availability updated to ${
+          response.data.isAvailable ? "Available" : "Not Available"
+        }`
+      );
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      toast.error("Failed to update availability.");
+    }
+  };
+
   if (!doctor) {
     return <div className="text-center text-lg font-semibold">Loading...</div>;
   }
 
   return (
     <div className="p-5 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-[#8851f8]">
+      <motion.h1
+        className="text-3xl font-bold mb-8 text-center text-gray-800"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         Doctor Profile
-      </h1>
+      </motion.h1>
 
       {!isEditing ? (
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <div className="grid grid-cols-2 gap-4">
-            <p>
-              <strong className="text-gray-700">Name:</strong> {doctor.name}
-            </p>
-            <p>
-              <strong className="text-gray-700">Email:</strong> {doctor.email}
-            </p>
-            <p>
-              <strong className="text-gray-700">Speciality:</strong>{" "}
-              {doctor.speciality}
-            </p>
-            <p>
-              <strong className="text-gray-700">Phone:</strong> {doctor.phone}
-            </p>
-            <p>
-              <strong className="text-gray-700">Address:</strong>{" "}
-              {doctor.address}
-            </p>
-            <p>
-              <strong className="text-gray-700">Fees:</strong> {doctor.fees}
-            </p>
-            <p>
-              <strong className="text-gray-700">Degree:</strong> {doctor.degree}
-            </p>
-            <p>
-              <strong className="text-gray-700">Experience:</strong>{" "}
-              {doctor.experience}
-            </p>
-            <p className="col-span-2">
-              <strong className="text-gray-700">About:</strong> {doctor.about}
-            </p>
-            <p className="col-span-2">
-              <strong className="text-gray-700">Timing:</strong> {doctor.timing}
-            </p>
+        <motion.div
+          className="bg-white shadow-md rounded-lg p-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center mb-6">
+            <img
+              src={doctor.image || "https://via.placeholder.com/150"}
+              alt="Doctor"
+              className="w-32 h-32 rounded-full object-cover mr-6"
+            />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-700">
+                {doctor.name}
+              </h2>
+              <div className="flex items-center mt-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={isAvailable}
+                    onChange={toggleAvailability}
+                    className="h-5 w-5 text-indigo-500 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {isAvailable ? "Available" : "Not Available"}
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
+          <table className="table-auto w-full text-left border-collapse">
+            <tbody>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Email:
+                </td>
+                <td className="border px-4 py-2">{doctor.email}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Speciality:
+                </td>
+                <td className="border px-4 py-2">{doctor.speciality}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Phone:
+                </td>
+                <td className="border px-4 py-2">{doctor.phone}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Address:
+                </td>
+                <td className="border px-4 py-2">{doctor.address}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Fees:
+                </td>
+                <td className="border px-4 py-2">{doctor.fees}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Degree:
+                </td>
+                <td className="border px-4 py-2">{doctor.degree}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Experience:
+                </td>
+                <td className="border px-4 py-2">{doctor.experience}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  About:
+                </td>
+                <td className="border px-4 py-2">{doctor.about}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold text-gray-700 border px-4 py-2">
+                  Timing:
+                </td>
+                <td className="border px-4 py-2">{doctor.timing}</td>
+              </tr>
+            </tbody>
+          </table>
           <button
-            className="mt-5 px-6 py-2 bg-violet-500 text-white rounded hover:bg-violet-600"
+            className="mt-5 px-6 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-200"
             onClick={() => setIsEditing(true)}
           >
             Edit Profile
           </button>
-        </div>
+        </motion.div>
       ) : (
         <form
           onSubmit={handleSubmit}
@@ -134,19 +213,10 @@ const Profile = () => {
               name="name"
               value={formData.name || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-semibold">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email || ""}
-              onChange={handleChange}
-              className="border p-2 w-full rounded"
-            />
-          </div>
+          
           <div>
             <label className="block text-gray-700 font-semibold">
               Speciality:
@@ -156,7 +226,7 @@ const Profile = () => {
               name="speciality"
               value={formData.speciality || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -166,7 +236,7 @@ const Profile = () => {
               name="phone"
               value={formData.phone || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -178,7 +248,7 @@ const Profile = () => {
               name="address"
               value={formData.address || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -188,7 +258,7 @@ const Profile = () => {
               name="fees"
               value={formData.fees || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -198,7 +268,7 @@ const Profile = () => {
               name="degree"
               value={formData.degree || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -210,7 +280,7 @@ const Profile = () => {
               name="experience"
               value={formData.experience || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -219,7 +289,7 @@ const Profile = () => {
               name="about"
               value={formData.about || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 peer h-full min-h-[100px] w-full resize-none w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -229,19 +299,20 @@ const Profile = () => {
               name="timing"
               value={formData.timing || ""}
               onChange={handleChange}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
           <div className="flex justify-end space-x-4">
             <button
               type="submit"
-              className="px-6 py-2 bg-violet-500 text-white rounded hover:bg-green-600"
+              className="px-6 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-200"
             >
               Save Changes
             </button>
             <button
               type="button"
-              className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-200"
               onClick={() => setIsEditing(false)}
             >
               Cancel
@@ -254,4 +325,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

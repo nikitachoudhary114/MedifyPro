@@ -6,7 +6,8 @@ import AdminLogin from './pages/AdminLogin';
 import Dashboard from './pages/Dashboard';
 import Appointment from './pages/appointment';
 import Profile from './pages/Profile';
-import PatientDetails from './pages/PatientDetails';
+import DashboardLayout from './components/DashboardLayout';
+import PrivateRoute from './components/PrivateRoute';
 function App() {
   
 
@@ -14,11 +15,22 @@ function App() {
     <>
       <div className="flex flex-col min-h-screen ">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/appointment" element={<Appointment />} />
-          <Route path="/profile" element={<Profile />} />
+
+          {/* Protected Routes with Dashboard Layout */}
+          <Route
+            element={
+              <PrivateRoute>
+                <DashboardLayout />
+              </PrivateRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/appointment" element={<Appointment />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
         </Routes>
       </div>
     </>

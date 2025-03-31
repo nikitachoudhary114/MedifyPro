@@ -7,14 +7,14 @@ import { assets } from "../assets/assets";
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null); // For storing selected patient details
-  const [isModalOpen, setIsModalOpen] = useState(false); // For controlling modal visibility
+  const [selectedPatient, setSelectedPatient] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
   const doctorId = decodedToken?.id;
 
-  // Fetch appointments for the doctor
+ 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -40,7 +40,7 @@ const Appointment = () => {
     }
   }, [doctorId, token]);
 
-  // Fetch patient details and open modal
+  
   const handleViewDetails = async (patientId) => {
     try {
       const response = await axios.get(
@@ -51,15 +51,15 @@ const Appointment = () => {
           },
         }
       );
-      setSelectedPatient(response.data.user); // Set the selected patient details
-      setIsModalOpen(true); // Open the modal
+      setSelectedPatient(response.data.user); 
+      setIsModalOpen(true); 
     } catch (error) {
       console.error("Error fetching patient details:", error);
       toast.error("Failed to fetch patient details");
     }
   };
 
-  // Close the modal
+  
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedPatient(null);

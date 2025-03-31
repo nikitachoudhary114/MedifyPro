@@ -139,7 +139,7 @@ const updateDoctorAvailabity = async (req, res) => {
       .status(200)
       .json({
         message: "Doctor availability updated successfully",
-        doctor: doc,
+        isAvailable: doc.availability,
       });
   } catch (error) {
     console.log(error);
