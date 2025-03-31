@@ -17,20 +17,22 @@ import {
   signUp,
   login,
   logout,
+  changeDoctorPassword,
 } from "../controller/doctorController.js";
 const doctorRoutes = express.Router();
 
-doctorRoutes.post("/signup", signUp);
-doctorRoutes.post("/login", login);
-doctorRoutes.post("/logout", logout);
+doctorRoutes.post("/signup", signUp);//done
+doctorRoutes.post("/login", login);//done
+doctorRoutes.post("/logout", logout);//done
 
-doctorRoutes.post("/add",auth, addDoctor);
-doctorRoutes.get("/all", auth, getAllDoctors);
-doctorRoutes.get("/:doctorId",auth, getDocById);
-doctorRoutes.delete("/:doctorId", auth, deleteDoctor);
-doctorRoutes.put("/:doctorId/", auth, updateDocProfile);
-doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);
-doctorRoutes.get("/:doctorId/available", getDoctorAvailability);
+doctorRoutes.post("/add",auth, addDoctor);//done
+doctorRoutes.get("/all", auth, getAllDoctors);//done
+doctorRoutes.get("/:doctorId", auth, getDocById);//done
+doctorRoutes.post('/:doctorId/update-password', auth, changeDoctorPassword);//done
+doctorRoutes.delete("/:doctorId", auth, deleteDoctor);//done
+doctorRoutes.put("/:doctorId/", auth, updateDocProfile);//done
+doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);//done
+doctorRoutes.get("/:doctorId/available", getDoctorAvailability);//not needed can find it through doc data
 
 //reviews
 doctorRoutes.post("/:doctorId/review", auth, addReview);

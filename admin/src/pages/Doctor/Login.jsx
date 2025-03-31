@@ -20,7 +20,7 @@ const Login = () => {
         toast.success("Login Success");
         localStorage.setItem("token", data.token);
         // console.log(localStorage.getItem("token"));
-        navigate("/dashboard");
+        navigate("doctor/dashboard");
       } else {
         toast.error(data.message);
       }
@@ -30,11 +30,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center mt-10">
-      <div className="shadow-xl p-8 rounded-xl w-96">
-        <h2 className="text-primary font-medium text-xl">Doctor Login</h2>
-       
-        <div className="mb-2 flex flex-col">
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded shadow-md w-96">
+        <h2 className="text-2xl font-bold mb-6 text-center">Doctor Login</h2>
+
+        {/* <div className="mb-2 flex flex-col">
           <label htmlFor="">Email</label>
           <input
             value={email}
@@ -42,8 +42,22 @@ const Login = () => {
             type="email"
             className="p-2 border rounded-lg mb-2"
           />
+        </div> */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            // value={formData.email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
         </div>
-        <div className="mb-2 flex flex-col">
+        {/* <div className="mb-2 flex flex-col">
           <label htmlFor="">Password</label>
           <input
             type="password"
@@ -51,11 +65,25 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="p-2 border rounded-lg mb-2"
           />
+        </div> */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">
+            Password
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={password}
+            // value={formData.password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
         </div>
         <div>
           <button
             onClick={handleLogin}
-            className="w-full py-2 mb-3 bg-[#8851f8] rounded-lg text-white"
+            className="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 transition duration-200"
           >
             Login
           </button>

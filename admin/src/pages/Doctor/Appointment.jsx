@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import { assets } from "../assets/assets";
+import { assets } from "../../assets/assets";
+
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);

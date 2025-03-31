@@ -9,6 +9,10 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(false); // For availability toggle
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  }); // For password update
 
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
@@ -45,6 +49,10 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePasswordChange = (e) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -63,6 +71,26 @@ const Profile = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile.");
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/doctor/${doctorId}/update-password`,
+        passwordData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Password updated successfully!");
+      setPasswordData({ currentPassword: "", newPassword: "" }); // Clear the form
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast.error("Failed to update password.");
     }
   };
 
@@ -194,6 +222,7 @@ const Profile = () => {
               </tr>
             </tbody>
           </table>
+
           <button
             className="mt-5 px-6 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-200"
             onClick={() => setIsEditing(true)}
@@ -216,7 +245,7 @@ const Profile = () => {
               className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-gray-700 font-semibold">
               Speciality:
@@ -289,7 +318,7 @@ const Profile = () => {
               name="about"
               value={formData.about || ""}
               onChange={handleChange}
-              className="border p-2 peer h-full min-h-[100px] w-full resize-none w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border p-2 peer h-full min-h-[100px] w-full resize-none  rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
@@ -302,7 +331,6 @@ const Profile = () => {
               className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-
           <div className="flex justify-end space-x-4">
             <button
               type="submit"
@@ -320,6 +348,50 @@ const Profile = () => {
           </div>
         </form>
       )}
+
+      {/* Password Update Section */}
+      <motion.div
+        className="bg-white shadow-md rounded-lg p-6 mt-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-xl font-bold text-gray-700 mb-4">
+          Update Password
+        </h2>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-semibold">
+              Current Password:
+            </label>
+            <input
+              type="password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">
+              New Password:
+            </label>
+            <input
+              type="password"
+              name="newPassword"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-200"
+          >
+            Update Password
+          </button>
+        </form>
+      </motion.div>
     </div>
   );
 };

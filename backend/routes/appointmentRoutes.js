@@ -12,9 +12,9 @@ const appointmentRoutes = express.Router();
 
 appointmentRoutes.post("/", createAppointment);
 appointmentRoutes.get("/user/:id",auth, getAppointmentForPatient);
-appointmentRoutes.get("/doctor/:id",auth, getAppointmentForDoctor);
+appointmentRoutes.get("/doctor/:id", auth, getAppointmentForDoctor);//done
 appointmentRoutes.put("/:appointmentId", auth, updateAppointment);
-appointmentRoutes.put("/:appointmentId/status", auth, changeAppointmentStatus);
+appointmentRoutes.put("/:appointmentId/status", auth, changeAppointmentStatus);//done
 appointmentRoutes.delete("/:appointmentId",auth, deleteAppointment);
 
 export default appointmentRoutes;

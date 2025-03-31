@@ -46,10 +46,19 @@ const addDoctor = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newDoc = new doctorModel({
+    const existingDoctor = await doctorModel.findOne({ email });
+    if (existingDoctor) {
+      return res.status(400).json({ message: "Doctor with this email already exists." });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new doctor
+    const newDoctor = new doctorModel({
       name,
       email,
-      password,
+      password: hashedPassword, // Save hashed password
       speciality,
       phone,
       address,
@@ -61,11 +70,12 @@ const addDoctor = async (req, res) => {
       timing,
     });
 
-    await newDoc.save();
+
+    await newDoctor.save();
     res.status(201).json({
       success: true,
       message: "Doctor added successfully",
-      doctor: newDoc,
+      doctor: newDoctor,
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -165,6 +175,34 @@ const getDoctorAvailability = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+const changeDoctorPassword = async (req, res) => {
+  const { doctorId } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const doctor = await doctorModel.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    // Check if the current password is correct
+    const isMatch = await bcrypt.compare(currentPassword, doctor.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    doctor.password = await bcrypt.hash(newPassword, salt);
+
+    await doctor.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
 
 const addReview = async (req, res) => {
   try {
@@ -467,4 +505,5 @@ export {
   signUp,
   login,
   logout,
+  changeDoctorPassword
 };

@@ -7,6 +7,7 @@ import userRouter from './routes/userRoutes.js'; // Import directly
 import doctorRoutes from './routes/doctorRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import { filter, search } from './controller/doctorController.js';
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -24,7 +25,8 @@ app.get("/", (req, res) => {
 
 app.use('/api/user', userRouter);
 app.use('/api/doctor', doctorRoutes);
-app.use('/api/appointments', appointmentRoutes)
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/admin', adminRoutes);
 app.get('/api/search', search);
 app.get('/api/filter', filter);
 
