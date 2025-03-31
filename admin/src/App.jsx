@@ -6,6 +6,7 @@ import AdminLogin from './pages/AdminLogin';
 import Dashboard from './pages/Dashboard';
 import Appointment from './pages/appointment';
 import Profile from './pages/Profile';
+import PatientDetails from './pages/PatientDetails';
 function App() {
   
 

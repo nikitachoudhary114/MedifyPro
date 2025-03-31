@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPatient, setSelectedPatient] = useState(null); // For storing selected patient details
+  const [isModalOpen, setIsModalOpen] = useState(false); // For controlling modal visibility
 
-  // Decode token to get doctorId
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
   const doctorId = decodedToken?.id;
@@ -39,33 +40,29 @@ const Appointment = () => {
     }
   }, [doctorId, token]);
 
-  // Change appointment status
-  const changeStatus = async (appointmentId, status) => {
+  // Fetch patient details and open modal
+  const handleViewDetails = async (patientId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/status`,
-        { status },
+      const response = await axios.get(
+        `http://localhost:8080/api/user/${patientId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      toast.success("Appointment status updated successfully");
-      setAppointments((prevAppointments) =>
-        prevAppointments.map((appointment) =>
-          appointment._id === appointmentId
-            ? {
-                ...appointment,
-                status: response.data.updatedAppointment.status,
-              }
-            : appointment
-        )
-      );
+      setSelectedPatient(response.data.user); // Set the selected patient details
+      setIsModalOpen(true); // Open the modal
     } catch (error) {
-      console.error("Error updating appointment status:", error);
-      toast.error("Failed to update appointment status");
+      console.error("Error fetching patient details:", error);
+      toast.error("Failed to fetch patient details");
     }
+  };
+
+  // Close the modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedPatient(null);
   };
 
   const formatDate = (dateString) => {
@@ -114,9 +111,6 @@ const Appointment = () => {
                   Status
                 </th>
                 <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
-                  Actions
-                </th>
-                <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
                   View
                 </th>
               </tr>
@@ -157,42 +151,67 @@ const Appointment = () => {
                       {appointment.status}
                     </span>
                   </td>
-                  <td className="border border-gray-200 px-6 py-5 flex justify-center gap-2">
-                    {appointment.status !== "Confirmed" && (
-                      <img
-                        className="w-9 cursor-pointer"
-                        onClick={() =>
-                          changeStatus(appointment._id, "Confirmed")
-                        }
-                        src={assets.tick_icon}
-                        alt="Confirm"
-                        title="Confirm Appointment"
-                      />
-                    )}
-                    {appointment.status !== "Cancelled" && (
-                      <img
-                        className="w-9 cursor-pointer"
-                        onClick={() =>
-                          changeStatus(appointment._id, "Cancelled")
-                        }
-                        src={assets.cancel_icon}
-                        alt="Cancel"
-                        title="Cancel Appointment"
-                      />
-                    )}
-                  </td>
                   <td className="border border-gray-300 px-6 py-3 text-center">
+                    
                     <img
-                      className="w-9 cursor-pointer"
                       src={assets.view}
-                      alt="View"
-                      title="View Details"
+                      className="w-7"
+                      alt="view"
+                      onClick={() =>
+                        handleViewDetails(appointment.patientId?._id)
+                      }
                     />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Modal for Patient Details */}
+      {isModalOpen && selectedPatient && (
+        <div
+          className="fixed inset-0  bg-opacity-100 flex items-center justify-center z-50 transition-opacity duration-300"
+          style={{ animation: "fadeIn 0.3s ease-in-out" }}
+        >
+          <div className="bg-white rounded-lg shadow-lg p-6 w-96 relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={closeModal}
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-center text-[#8851f8]">
+              Patient Details
+            </h2>
+            <table className="table-auto w-full text-left">
+              <tbody>
+                <tr>
+                  <td className="font-semibold text-gray-700">Name:</td>
+                  <td>{selectedPatient.name}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold text-gray-700">Gender:</td>
+                  <td>{selectedPatient.gender}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold text-gray-700">DOB:</td>
+                  <td>{formatDate(selectedPatient.dob)}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold text-gray-700">Address:</td>
+                  <td>{selectedPatient.address}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold text-gray-700">
+                    Medical History:
+                  </td>
+                  <td>{selectedPatient.medicalHistory || "N/A"}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
