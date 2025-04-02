@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import userModel from "../model/userModel.js";
-import cloudinary from "../util/cloudinary.js";
+import {cloudinary} from "../util/cloudinary.js";
 
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
@@ -87,9 +87,9 @@ const getProfile = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Unauthorized access" });
     }
-    // console.log("User ID:", req.user.id);
+
     const user = await userModel.findById(req.user.id);
-    // console.log("User:", user);
+
     if (!user) {
       return res
         .status(404)
@@ -105,6 +105,7 @@ const getProfile = async (req, res) => {
         address: user.address,
         dob: user.dob,
         gender: user.gender,
+        image: user.image, // Include the image field
       },
     });
   } catch (error) {
@@ -112,6 +113,7 @@ const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching profile" });
   }
 };
+
 
 const editProfile = async (req, res) => {
   const { name, phone, address, dob, gender } = req.body;
@@ -126,7 +128,12 @@ const editProfile = async (req, res) => {
       gender,
     };
 
-    // Update user data (excluding email)
+    // If a new image is uploaded, add it to the updateData
+    if (req.file) {
+      updateData.image = req.file.path; // Save only the Cloudinary URL
+    }
+
+    // Update user data (excluding email and password)
     const user = await userModel.findByIdAndUpdate(
       req.user.id, // Assuming `req.user.id` contains the authenticated user's ID
       updateData,
@@ -149,6 +156,7 @@ const editProfile = async (req, res) => {
         address: user.address,
         dob: user.dob,
         gender: user.gender,
+        image: user.image, // Include updated image URL
       },
     });
   } catch (error) {
@@ -158,7 +166,6 @@ const editProfile = async (req, res) => {
       .json({ success: false, message: "Failed to update profile" });
   }
 };
-
 // const getProfile = async (req, res) => {
 //     try {
 //         const user = await userModel.findById(req);

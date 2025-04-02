@@ -19,13 +19,14 @@ import {
   logout,
   changeDoctorPassword,
 } from "../controller/doctorController.js";
+import { upload } from "../util/cloudinary.js";
 const doctorRoutes = express.Router();
 
 doctorRoutes.post("/signup", signUp);//done
 doctorRoutes.post("/login", login);//done
 doctorRoutes.post("/logout", logout);//done
 
-doctorRoutes.post("/add",auth, addDoctor);//done
+doctorRoutes.post("/add", upload.single("image"), addDoctor);//done
 doctorRoutes.get("/all", auth, getAllDoctors);//done
 doctorRoutes.get("/:doctorId", auth, getDocById);//done
 doctorRoutes.post('/:doctorId/update-password', auth, changeDoctorPassword);//done

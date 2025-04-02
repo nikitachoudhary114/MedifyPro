@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs/dist/bcrypt.js";
 import doctorModel from "../model/doctorModel.js";
 import validator from "validator";
 import jwt from "jsonwebtoken";
+import { upload } from "../util/cloudinary.js";
 
 const getAllDoctors = async (req, res) => {
   try {
@@ -15,6 +16,8 @@ const getAllDoctors = async (req, res) => {
 
 const addDoctor = async (req, res) => {
   try {
+
+
     const {
       name,
       email,
@@ -23,7 +26,6 @@ const addDoctor = async (req, res) => {
       phone,
       address,
       fees,
-      image,
       degree,
       experience,
       about,
@@ -31,17 +33,9 @@ const addDoctor = async (req, res) => {
     } = req.body;
 
     if (
-      !name ||
-      !email ||
-      !password ||
-      !speciality ||
-      !phone ||
-      !address ||
-      !fees ||
-      !degree ||
-      !experience ||
-      !about ||
-      !timing
+      !name || !email || !password || !speciality ||
+      !phone || !address || !fees || !degree || !experience ||
+      !about || !timing
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -51,43 +45,50 @@ const addDoctor = async (req, res) => {
       return res.status(400).json({ message: "Doctor with this email already exists." });
     }
 
-    // Hash the password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new doctor
+    // Check if an image was uploaded
+    // const imageUrl = req.file ? req.file.path : null;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: "Image upload failed. Please upload an image." });
+    }
+
+    const imageUrl = req.file.path; // Cloudinary URL
+    console.log("Image URL:", imageUrl);
+
+   
+
+    // Create doctor
     const newDoctor = new doctorModel({
       name,
       email,
-      password: hashedPassword, // Save hashed password
+      password: hashedPassword,
       speciality,
       phone,
       address,
       fees,
-      image,
+      image: imageUrl, // Save Cloudinary URL
       degree,
       experience,
       about,
       timing,
     });
 
-
     await newDoctor.save();
+
     res.status(201).json({
       success: true,
       message: "Doctor added successfully",
       doctor: newDoctor,
     });
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: "Duplicate field error. Email already exists.",
-      });
-    }
-    console.log(error);
+    console.error(error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
 
 const getDocById = async (req, res) => {
   try {

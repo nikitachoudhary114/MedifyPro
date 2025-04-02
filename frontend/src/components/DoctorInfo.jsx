@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { assets, doctors } from "../assets/assets";
 
@@ -7,6 +7,7 @@ const DoctorInfo = () => {
   const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const token = localStorage.getItem("token");
 
   const doctor = doctors.filter((doc) => doc._id === id)[0];
   const relatedDocs = doctors.filter(
@@ -24,6 +25,12 @@ const DoctorInfo = () => {
   const handleTimeClick = (time) => {
     setSelectedTime(time);
   };
+
+  useEffect(() => {
+    const makeAppointment = async () => {
+      const response = axios.post("http://localhost:8080/api/");
+    }
+  })
 
   return (
     <div className="mt-8 px-4">

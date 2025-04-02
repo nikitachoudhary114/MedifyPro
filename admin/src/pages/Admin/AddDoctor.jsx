@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { assets } from "../../assets/assets";
 
 const AddDoctor = () => {
   const [formData, setFormData] = useState({
@@ -26,48 +27,60 @@ const AddDoctor = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const adminToken = localStorage.getItem("adminToken");
-      const response = await axios.post(
-        "http://localhost:8080/api/doctor/add",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
-        }
-      );
+  try {
+    const adminToken = localStorage.getItem("adminToken");
 
-      toast.success(response.data.message || "Doctor added successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        speciality: "",
-        phone: "",
-        address: "",
-        fees: "",
-        // image: "",
-        degree: "",
-        experience: "",
-        about: "",
-        timing: "",
-      });
-    } catch (error) {
-      console.error("Error adding doctor:", error);
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to add doctor. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Create FormData to handle file uploads
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+      formDataToSend.append(key, formData[key]);
+    });
+
+    const response = await axios.post(
+      "http://localhost:8080/api/doctor/add",
+      formDataToSend,
+      {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    // Show success toast
+    toast.success(response.data.message || "Doctor added successfully!");
+
+    // Reset form data
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      speciality: "",
+      phone: "",
+      address: "",
+      fees: "",
+      degree: "",
+      experience: "",
+      about: "",
+      timing: "",
+      image: null,
+    });
+  } catch (error) {
+    console.error("Error adding doctor:", error);
+
+    // Show failure toast
+    toast.error(
+      error.response?.data?.message || "Failed to add doctor. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <motion.div
@@ -88,11 +101,43 @@ const AddDoctor = () => {
 
         {/* Doctor Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-2">
+              Profile Image
+            </label>
+            <div
+              className="cursor-pointer"
+              onClick={() => document.getElementById("imageInput").click()} // Trigger file input click
+            >
+              <img
+                src={
+                  formData.image
+                    ? URL.createObjectURL(formData.image) // Show preview if image is selected
+                    : assets.upload_area // Show placeholder if no image is selected
+                }
+                alt="Profile Preview"
+                className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow-md"
+              />
+            </div>
+            <input
+              type="file"
+              id="imageInput"
+              name="image"
+              accept="image/*"
+              onChange={
+                (e) => setFormData({ ...formData, image: e.target.files[0] }) // Update formData with selected file
+              }
+              className="hidden" // Hide the file input
+            />
+          </div>
+
           {/* Name */}
           <div>
             <label className="block text-gray-700 font-semibold mb-2">
               Name
             </label>
+
             <input
               type="text"
               name="name"

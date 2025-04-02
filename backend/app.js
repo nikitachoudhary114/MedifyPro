@@ -30,6 +30,7 @@ app.use('/api/admin', adminRoutes);
 app.get('/api/search', search);
 app.get('/api/filter', filter);
 
+
 app.listen(port, () => {
     console.log(`Server listening to port ${port}`);
 });

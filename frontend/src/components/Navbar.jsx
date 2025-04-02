@@ -3,12 +3,14 @@ import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const Navbar = () => {
   const [dark, setDark] = useState(false); 
   const [token, setToken] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const navigate = useNavigate();
+  const [image, setImage] = useState(null)
 
   function dropdownToggle() {
     setDropdown(!dropdown);
@@ -45,6 +47,36 @@ const Navbar = () => {
       newTheme ? "dark" : "light"
     );
   }
+
+
+   useEffect(() => {
+     const fetchProfileData = async () => {
+       try {
+         const response = await axios.get(
+           "http://localhost:8080/api/user/profile",
+           {
+             headers: {
+               "Content-Type": "application/json",
+               Authorization: `Bearer ${localStorage.getItem("token")}`,
+             },
+           }
+         );
+
+         if (response.data.success) {
+           const user = response.data.user;
+           
+           setImage(user.image || null); // Load existing profile image
+         } else {
+           toast.error("Failed to load profile data");
+         }
+       } catch (error) {
+         console.error("Error fetching profile data:", error);
+         toast.error("An error occurred while fetching the profile data");
+       }
+     };
+
+     fetchProfileData();
+   }, []);
 
   return (
     <>
@@ -114,7 +146,7 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-2 relative">
                 <img
-                  src={assets.profile_pic}
+                  src={image}
                   alt=""
                   className="w-12 rounded-full"
                 />
