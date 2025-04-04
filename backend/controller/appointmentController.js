@@ -4,13 +4,34 @@ import userModel from "../model/userModel.js";
 
 const createAppointment = async (req, res) => {
   try {
-    const { patientId, doctorId, date, time, status } = req.body;
-    if (!patientId || !doctorId || !date || !time || !status) {
+    const { doctorId, date, time, status } = req.body;
+
+    if (!doctorId || !date || !time || !status) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    // Extract patient ID from the authenticated user (via auth middleware)
+    const patientId = req.user.id;
+    // Check if the doctor exists
+    const doctor = await doctorModel.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+    // Check if the patient exists
+    const patient = await userModel.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+    // Check if the appointment time is available
+    const existingAppointment = await appointmentModel.findOne({
+      doctorId,
+      date, 
+      time,
+    });
+    if (existingAppointment) {
+      return res.status(400).json({ message: "Time slot is already booked" });
+    }
     
-
     const newAppointment = new appointmentModel({
       patientId,
       doctorId,
@@ -21,15 +42,12 @@ const createAppointment = async (req, res) => {
 
     const savedAppointment = await newAppointment.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Appointment Created Successfully",
-        appointment: savedAppointment,
-        patientDetails
-      });
+    res.status(201).json({
+      message: "Appointment Created Successfully",
+      appointment: savedAppointment,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error creating appointment:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -6,33 +6,61 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 const Navbar = () => {
-  const [dark, setDark] = useState(false); 
+  const [dark, setDark] = useState(false);
   const [token, setToken] = useState(false);
   const [dropdown, setDropdown] = useState(false);
+  const [image, setImage] = useState(null);
   const navigate = useNavigate();
-  const [image, setImage] = useState(null)
 
   function dropdownToggle() {
     setDropdown(!dropdown);
   }
-  
+
   useEffect(() => {
-    
-      const storedToken = localStorage.getItem("token");
-    if (storedToken) { setToken(true); } 
-  
-  },[])
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(true);
+
+      // Fetch profile data only if the user is logged in
+      const fetchProfileData = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:8080/api/user/profile",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${storedToken}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            const user = response.data.user;
+            setImage(user.image || null); // Load existing profile image
+          } else {
+            toast.error("Failed to load profile data");
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+          toast.error("An error occurred while fetching the profile data");
+        }
+      };
+
+      fetchProfileData();
+    }
+  }, []);
 
   const handleLogout = () => {
     try {
       localStorage.removeItem("token");
       toast.success("Logout Success");
       setToken(false);
+      setImage(null); // Reset profile image
       navigate("/");
     } catch (error) {
       toast.error("Logout Failed");
     }
-  }
+  };
 
   useEffect(() => {
     // Set the initial theme to light mode
@@ -47,36 +75,6 @@ const Navbar = () => {
       newTheme ? "dark" : "light"
     );
   }
-
-
-   useEffect(() => {
-     const fetchProfileData = async () => {
-       try {
-         const response = await axios.get(
-           "http://localhost:8080/api/user/profile",
-           {
-             headers: {
-               "Content-Type": "application/json",
-               Authorization: `Bearer ${localStorage.getItem("token")}`,
-             },
-           }
-         );
-
-         if (response.data.success) {
-           const user = response.data.user;
-           
-           setImage(user.image || null); // Load existing profile image
-         } else {
-           toast.error("Failed to load profile data");
-         }
-       } catch (error) {
-         console.error("Error fetching profile data:", error);
-         toast.error("An error occurred while fetching the profile data");
-       }
-     };
-
-     fetchProfileData();
-   }, []);
 
   return (
     <>
@@ -146,14 +144,18 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-2 relative">
                 <img
-                  src={image}
-                  alt=""
+                  src={
+                    image
+                      ? image
+                      : "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png"
+                  }
+                  alt="Profile"
                   className="w-12 rounded-full"
                 />
                 <img
                   onClick={dropdownToggle}
                   src={assets.dropdown_icon}
-                  alt=""
+                  alt="Dropdown"
                 />
                 {dropdown ? (
                   <div className="bg-gray-100 p-4 absolute top-16 right-[0px] mt-2 w-40">
@@ -168,7 +170,9 @@ const Navbar = () => {
                       </h2>
                     </Link>
                     <div onClick={handleLogout}>
-                      <h2 className="py-1 text-base font-normal cursor-pointer ">Logout</h2>
+                      <h2 className="py-1 text-base font-normal cursor-pointer ">
+                        Logout
+                      </h2>
                     </div>
                   </div>
                 ) : (

@@ -27,13 +27,13 @@ doctorRoutes.post("/login", login);//done
 doctorRoutes.post("/logout", logout);//done
 
 doctorRoutes.post("/add", upload.single("image"), addDoctor);//done
-doctorRoutes.get("/all", auth, getAllDoctors);//done
+doctorRoutes.get("/all", auth, getAllDoctors); 
 doctorRoutes.get("/:doctorId", auth, getDocById);//done
 doctorRoutes.post('/:doctorId/update-password', auth, changeDoctorPassword);//done
 doctorRoutes.delete("/:doctorId", auth, deleteDoctor);//done
 doctorRoutes.put("/:doctorId/", auth, updateDocProfile);//done
 doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);//done
-doctorRoutes.get("/:doctorId/available", getDoctorAvailability);//not needed can find it through doc data
+doctorRoutes.get("/:doctorId/available-slots", auth, getDoctorAvailability);
 
 //reviews
 doctorRoutes.post("/:doctorId/review", auth, addReview);

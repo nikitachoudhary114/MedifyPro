@@ -2,15 +2,24 @@ import bcrypt from "bcryptjs/dist/bcrypt.js";
 import doctorModel from "../model/doctorModel.js";
 import validator from "validator";
 import jwt from "jsonwebtoken";
-import { upload } from "../util/cloudinary.js";
+
+import appointmentModel from "../model/appointmentModel.js";
+
 
 const getAllDoctors = async (req, res) => {
   try {
-    const doctors = await doctorModel.find();
+    const { speciality } = req.query; 
+
+    const query = {};
+    if (speciality) {
+      query.speciality = speciality; 
+    }
+
+    const doctors = await doctorModel.find(query); 
     res.json({ success: true, data: doctors });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error in fetching doctor's data" });
+    res.status(500).json({ success: false, message: "Error in fetching doctor's data" });
   }
 };
 
@@ -158,22 +167,35 @@ const updateDoctorAvailabity = async (req, res) => {
   }
 };
 
+
+
 const getDoctorAvailability = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const doc = await doctorModel.findById(doctorId);
+    const { date } = req.query; // Optional date parameter
 
-    if (!doc) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Doctor Not Found" });
+    const doctor = await doctorModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    const available = doc.availability;
-    res.status(200).json({ success: true, available });
+    const [startTime, endTime] = doctor.timing.split(" to "); // Assuming timing is stored as "9:00 AM to 3:00 PM"
+    const availableSlots = generateTimeSlots(startTime, endTime);
+
+    // Optionally, filter out already booked slots for the given date
+    const bookedAppointments = await appointmentModel.find({
+      doctorId,
+      date: new Date(date),
+    });
+
+    const bookedSlots = bookedAppointments.map((appointment) => appointment.time);
+    const filteredSlots = availableSlots.filter((slot) => !bookedSlots.includes(slot));
+
+    res.status(200).json({ success: true, availableSlots: filteredSlots });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Error fetching doctor availability:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
