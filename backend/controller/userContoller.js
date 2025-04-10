@@ -2,10 +2,9 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import userModel from "../model/userModel.js";
-import {cloudinary} from "../util/cloudinary.js";
-
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
+import  razorpay from  'razorpay'
+import appointmentModel from "../model/appointmentModel.js";
+import doctorModel from "../model/doctorModel.js";
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -166,54 +165,7 @@ const editProfile = async (req, res) => {
       .json({ success: false, message: "Failed to update profile" });
   }
 };
-// const getProfile = async (req, res) => {
-//     try {
-//         const user = await userModel.findById(req);
-//         if (!user) {
-//             return res.json({ success: false, message: "User not found" });
-//         }
-//         console.log(user);
-//         res.status(200).json(user);
-//     } catch (error) {
-//         console.log(error)
-//         res.json({ success: false, message: "Error" })
 
-//     }
-// }
-
-// const storage = new CloudinaryStorage({
-//     cloudinary: cloudinary,
-//     params: {
-//         folder: "medifyPro",
-//         allowed_formats: ["jpg", "jpeg", "png"],
-//     }
-// })
-
-// const upload = multer({ storage }).single("image");
-
-// const editProfile = async (req, res) => {
-//     const { name, phone, addressLine1, addressLine2, dob, gender } = req.body;
-
-//     try {
-//         const updateData = {
-//             name, phone, addressLine1, addressLine2,
-//             dob: dob ? new Date(dob) : null,
-//             gender,
-//         }
-
-//         if (req.file) {
-//             updateData.image = req.file.path;
-//         }
-
-//         const user = await userModel.findByIdAndUpdate(req.user.id, updateData
-//             , { new: true });
-//         res.status(200).json(user);
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({ error: "Failed to update profile" });
-
-//     }
-// }
 
 const allUsers = async (req, res) => {
   try {
@@ -256,6 +208,44 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const razorpayInstance = new razorpay({
+  key_id: "rzp_test_VuXL9xKSfucJ3D",
+  key_secret: "NscUSHpcPjO78zXJTQ98isuI",
+  
+}
+)
+
+
+const razorpayPayment = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+
+    // Fetch the appointment and populate the doctorId field
+    const appointmentData = await appointmentModel
+      .findById(appointmentId)
+      .populate("doctorId", "fees");
+
+    if (!appointmentData || appointmentData.status === "Cancelled") {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment cancelled or not found" });
+    }
+
+    const options = {
+      amount: appointmentData.doctorId.fees * 100, // Convert fees to paise
+      currency: process.env.CURRENCY ,
+      receipt: appointmentId.toString(),
+    };
+
+    const order = await razorpayInstance.orders.create(options);
+
+    res.json({ success: true, order });
+  } catch (error) {
+    console.error("Error in Razorpay payment:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -265,4 +255,5 @@ export {
   allUsers,
   getSpecificUser,
   deleteUser,
+  razorpayPayment
 };

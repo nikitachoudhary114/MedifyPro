@@ -77,8 +77,8 @@ const getAppointmentForDoctor = async (req, res) => {
 
 const getAppointmentForPatient = async (req, res) => {
   try {
-    const { id } = req.params;
-    const patientAppointments = await appointmentModel.find({ patientId: id });
+    const patientId = req.user.id;
+    const patientAppointments = await appointmentModel.find({ patientId }).populate("doctorId", "name speciality image fees");
     res
       .status(200)
       .json({ message: "All patient appointment", patientAppointments });

@@ -7,6 +7,7 @@ import {
     getSpecificUser,
     loginUser,
     logoutUser,
+    razorpayPayment,
     registerUser,
 } from "../controller/userContoller.js";
 import { auth } from "../middleware/auth.js";
@@ -22,5 +23,7 @@ userRouter.delete("/:userId", auth, deleteUser); // done
 userRouter.post("/register", registerUser); // done
 userRouter.post("/login", loginUser); // done
 userRouter.post("/logout", logoutUser); // done
+userRouter.post("/payment",auth, razorpayPayment); // done
+
 
 export default userRouter;
