@@ -229,7 +229,8 @@ const changeDoctorPassword = async (req, res) => {
 
 const addReview = async (req, res) => {
   try {
-    const { userId, review, rating } = req.body;
+    const { review, rating } = req.body;
+    const userId = req.user.id; 
     const { doctorId } = req.params;
 
     const doctor = await doctorModel.findById(doctorId);
@@ -237,6 +238,16 @@ const addReview = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
+    // Check if the user has already added a review
+    const existingReview = doctor.reviews.find(
+      (rev) => rev.userId.toString() === userId
+    );
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this doctor." });
+    }
+
     const newRating = {
       userId,
       rating,

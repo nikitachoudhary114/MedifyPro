@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { FaStar } from "react-icons/fa";
 
 const DoctorInfo = () => {
   const { id } = useParams();
@@ -13,6 +14,11 @@ const DoctorInfo = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(0);
+    const [editingReview, setEditingReview] = useState(null);
+  const [reviewText, setReviewText] = useState("");
+   const [rating, setRating] = useState(0);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -49,6 +55,9 @@ const DoctorInfo = () => {
         const today = new Date().toISOString().split("T")[0];
         setSelectedDate(today);
         fetchAvailableSlots(today, doctorData.timing);
+
+        // Fetch reviews and average rating
+        fetchReviewsAndRating();
       } catch (error) {
         console.error("Error fetching doctor details:", error);
       } finally {
@@ -59,53 +68,113 @@ const DoctorInfo = () => {
     fetchDoctorDetails();
   }, [id, token]);
 
- const convertTo24HourFormat = (time) => {
-   const [hours, minutes] = time.split(/[: ]/);
-   const period = time.split(" ")[1];
-   let hours24 = parseInt(hours, 10);
+  const fetchReviewsAndRating = async () => {
+    try {
+      const reviewsResponse = await axios.get(
+        `http://localhost:8080/api/doctor/${id}/review`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-   if (period === "PM" && hours24 !== 12) {
-     hours24 += 12;
-   } else if (period === "AM" && hours24 === 12) {
-     hours24 = 0;
-   }
+      const avgRatingResponse = await axios.get(
+        `http://localhost:8080/api/doctor/${id}/average-rating`
+      );
 
-   return `${hours24.toString().padStart(2, "0")}:${minutes}`;
- };
+      setReviews(reviewsResponse.data.reviews || []);
+      setAvgRating(avgRatingResponse.data.data || 0);
+    } catch (error) {
+      console.error("Error fetching reviews and rating:", error);
+    }
+  };
 
+  const updateReview = async (reviewId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:8080/api/doctor/${id}/review/${reviewId}`,
+        { review: reviewText, rating },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
- const generateTimeSlots = (startTime, endTime) => {
-   const slots = [];
-   const now = new Date();
-   const selectedDateTime = new Date(selectedDate);
-   const isToday = now.toDateString() === selectedDateTime.toDateString();
+      toast.success(response.data.message);
+      setEditingReview(null);
+      fetchReviewsAndRating(); // Refresh reviews
+    } catch (error) {
+      console.error("Error updating review:", error);
+      toast.error("Failed to update review.");
+    }
+  };
 
-   const [startHours, startMinutes] =
-     convertTo24HourFormat(startTime).split(":");
-   const [endHours, endMinutes] = convertTo24HourFormat(endTime).split(":");
+  const deleteReview = async (reviewId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/doctor/${id}/review/${reviewId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-   let current = new Date(selectedDateTime);
-   current.setHours(parseInt(startHours));
-   current.setMinutes(parseInt(startMinutes));
-   current.setSeconds(0);
-   current.setMilliseconds(0);
+      toast.success(response.data.message);
+      fetchReviewsAndRating(); // Refresh reviews
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      toast.error("Failed to delete review.");
+    }
+  };
 
-   const end = new Date(selectedDateTime);
-   end.setHours(parseInt(endHours));
-   end.setMinutes(parseInt(endMinutes));
+  const convertTo24HourFormat = (time) => {
+    const [hours, minutes] = time.split(/[: ]/);
+    const period = time.split(" ")[1];
+    let hours24 = parseInt(hours, 10);
 
-   while (current < end) {
-     if (!isToday || current > now) {
-       slots.push(
-         current.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-       );
-     }
-     current = new Date(current.getTime() + 30 * 60 * 1000); // Add 30 minutes
-   }
+    if (period === "PM" && hours24 !== 12) {
+      hours24 += 12;
+    } else if (period === "AM" && hours24 === 12) {
+      hours24 = 0;
+    }
 
-   return slots;
- };
+    return `${hours24.toString().padStart(2, "0")}:${minutes}`;
+  };
 
+  const generateTimeSlots = (startTime, endTime) => {
+    const slots = [];
+    const now = new Date();
+    const selectedDateTime = new Date(selectedDate);
+    const isToday = now.toDateString() === selectedDateTime.toDateString();
+
+    const [startHours, startMinutes] =
+      convertTo24HourFormat(startTime).split(":");
+    const [endHours, endMinutes] = convertTo24HourFormat(endTime).split(":");
+
+    let current = new Date(selectedDateTime);
+    current.setHours(parseInt(startHours));
+    current.setMinutes(parseInt(startMinutes));
+    current.setSeconds(0);
+    current.setMilliseconds(0);
+
+    const end = new Date(selectedDateTime);
+    end.setHours(parseInt(endHours));
+    end.setMinutes(parseInt(endMinutes));
+
+    while (current < end) {
+      if (!isToday || current > now) {
+        slots.push(
+          current.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        );
+      }
+      current = new Date(current.getTime() + 30 * 60 * 1000); // Add 30 minutes
+    }
+
+    return slots;
+  };
 
   const generateDates = () => {
     const dates = [];
@@ -198,7 +267,29 @@ const DoctorInfo = () => {
         </div>
 
         <div className="flex-1 flex flex-col border border-violet-300 rounded-xl p-6 sm:p-8">
-          <h2 className="text-2xl font-medium mb-4">{doctor.name}</h2>
+          <div className="flex items-center">
+            <div>
+              <h2 className="text-2xl font-medium mb-4">{doctor.name}</h2>
+            </div>
+
+            <div className="flex items-center mb-4">
+              {/* <h3 className="text-lg font-medium">Average Rating:</h3> */}
+              <div className="flex items-center ml-2">
+                {[...Array(5)].map((_, index) => (
+                  <FaStar
+                    key={index}
+                    className={`${
+                      index < Math.round(avgRating)
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+                <span className="ml-2 text-gray-600">({avgRating})</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2 items-center mb-4">
             <p>{doctor.degree}</p>
             <span>-</span>
@@ -223,6 +314,94 @@ const DoctorInfo = () => {
         </div>
       </div>
 
+      {/* Average Rating and Reviews */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Reviews & Ratings</h2>
+        <div className="space-y-4">
+          {reviews.length === 0 ? (
+            <p className="text-gray-600">No reviews yet.</p>
+          ) : (
+            reviews.map((review) => (
+              <div
+                key={review._id}
+                className="border border-gray-300 rounded-lg p-4"
+              >
+                <div className="flex items-center mb-2">
+                  <FaStar className="text-yellow-500" />
+                  <span className="ml-2 font-medium">
+                    {review.rating} Stars
+                  </span>
+                </div>
+                {editingReview === review._id ? (
+                  <div>
+                    <textarea
+                      className="w-full p-2 border rounded mb-2"
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                    ></textarea>
+                    <select
+                      className="w-full p-2 border rounded mb-2"
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                    >
+                      <option value={0}>Select Rating</option>
+                      {[1, 2, 3, 4, 5].map((r) => (
+                        <option key={r} value={r}>
+                          {" "}
+                          {r} -{" "}
+                          {
+                            ["Poor", "Fair", "Good", "Very Good", "Excellent"][
+                              r - 1
+                            ]
+                          }
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
+                      onClick={() => updateReview(review._id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-gray-300 rounded"
+                      onClick={() => setEditingReview(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-gray-700">{review.review}</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Reviewed on:{" "}
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </p>
+                    <button
+                      className="text-blue-500 hover:underline mr-2"
+                      onClick={() => {
+                        setEditingReview(review._id);
+                        setReviewText(review.review);
+                        setRating(review.rating);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="text-red-500 hover:underline"
+                      onClick={() => deleteReview(review._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Booking Slots */}
       <div className="flex justify-center items-start mt-8">
         <div className="w-full">
           <h2 className="text-violet-700 text-xl font-medium pb-4">

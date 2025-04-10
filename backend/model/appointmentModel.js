@@ -5,6 +5,7 @@ const appointmentSchema = new mongoose.Schema({
     doctorId: { type: mongoose.Types.ObjectId, ref: "doctor", required: true },
     date: { type: Date, required: true },
     time: { type: String, required: true },
+    payment:{type: Boolean, default:false },
     paymentMode: {type: String, enum:["Cash", "Online"], default: "Cash"},
     status: {type:String, enum:["Pending", "Confirmed", "Cancelled"], default:"Pending"}
 });

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import userModel from "../model/userModel.js";
-import  razorpay from  'razorpay'
+import razorpay from 'razorpay'
 import appointmentModel from "../model/appointmentModel.js";
 import doctorModel from "../model/doctorModel.js";
 
@@ -201,7 +201,7 @@ const deleteUser = async (req, res) => {
     if (!user) {
       res.status(404).json({ message: "No Users Found" });
     }
-    res.status(200).json({message: "User Deleted successfully", user });
+    res.status(200).json({ message: "User Deleted successfully", user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "server error" });
@@ -211,7 +211,7 @@ const deleteUser = async (req, res) => {
 const razorpayInstance = new razorpay({
   key_id: "rzp_test_VuXL9xKSfucJ3D",
   key_secret: "NscUSHpcPjO78zXJTQ98isuI",
-  
+
 }
 )
 
@@ -233,7 +233,7 @@ const razorpayPayment = async (req, res) => {
 
     const options = {
       amount: appointmentData.doctorId.fees * 100, // Convert fees to paise
-      currency: process.env.CURRENCY ,
+      currency: process.env.CURRENCY || "INR",
       receipt: appointmentId.toString(),
     };
 
@@ -246,6 +246,29 @@ const razorpayPayment = async (req, res) => {
   }
 };
 
+const verifyRazorpay = async (req, res) => {
+  try {
+    const { razorpay_order_id } = req.body;
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+
+    // console.log(orderInfo)
+
+
+    if (orderInfo.status === 'paid') {
+      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true,  paymentMode:"Online", status: "Confirmed" });
+      res.json({ success: true, message: "payment successful" })
+    } else {
+      res.json({success:false, message:"payment fail"})
+    }
+
+
+
+  } catch (error) {
+    console.error("Error in Razorpay payment:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
 export {
   loginUser,
   registerUser,
@@ -255,5 +278,6 @@ export {
   allUsers,
   getSpecificUser,
   deleteUser,
-  razorpayPayment
+  razorpayPayment,
+  verifyRazorpay
 };

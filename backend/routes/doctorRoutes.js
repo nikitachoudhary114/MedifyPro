@@ -36,10 +36,10 @@ doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);//done
 doctorRoutes.get("/:doctorId/available-slots", auth, getDoctorAvailability);
 
 //reviews
-doctorRoutes.post("/:doctorId/review", auth, addReview);
-doctorRoutes.get("/:doctorId/review", auth, getReview);
-doctorRoutes.patch("/:doctorId/review/:reviewId", auth, updatReview);
-doctorRoutes.delete("/:doctorId/review/:reviewId", auth, deleteReview);
-doctorRoutes.get("/:doctorId/average-rating", avgRating);
+doctorRoutes.post("/:doctorId/review", auth, addReview); //done
+doctorRoutes.get("/:doctorId/review", auth, getReview);//done
+doctorRoutes.patch("/:doctorId/review/:reviewId", auth, updatReview);//done
+doctorRoutes.delete("/:doctorId/review/:reviewId", auth, deleteReview);//done
+doctorRoutes.get("/:doctorId/average-rating", avgRating);//done
 
 export default doctorRoutes;

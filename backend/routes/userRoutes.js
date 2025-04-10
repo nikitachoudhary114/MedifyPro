@@ -9,6 +9,7 @@ import {
     logoutUser,
     razorpayPayment,
     registerUser,
+    verifyRazorpay,
 } from "../controller/userContoller.js";
 import { auth } from "../middleware/auth.js";
 import { upload } from "../util/cloudinary.js";
@@ -24,6 +25,7 @@ userRouter.post("/register", registerUser); // done
 userRouter.post("/login", loginUser); // done
 userRouter.post("/logout", logoutUser); // done
 userRouter.post("/payment",auth, razorpayPayment); // done
+userRouter.post("/verify",auth, verifyRazorpay); // done
 
 
 export default userRouter;
