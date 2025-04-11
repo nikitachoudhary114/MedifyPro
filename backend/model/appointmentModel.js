@@ -7,7 +7,7 @@ const appointmentSchema = new mongoose.Schema({
     time: { type: String, required: true },
     payment:{type: Boolean, default:false },
     paymentMode: {type: String, enum:["Cash", "Online"], default: "Cash"},
-    status: {type:String, enum:["Pending", "Confirmed", "Cancelled"], default:"Pending"}
+    status: {type:String, enum:["Completed", "Confirmed", "Cancelled"], default:"Confirmed"}
 });
 
 const appointmentModel = mongoose.model("appointment", appointmentSchema);

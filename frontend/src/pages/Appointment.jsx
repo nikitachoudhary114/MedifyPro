@@ -201,7 +201,7 @@ const Appointment = () => {
                   {appointment.payment ? (
                     <>
                       <button
-                        className="w-4/5 p-2 bg-slate-200 text-gray-700 text-lg my-1"
+                        className="w-3/4 p-2 bg-slate-200 text-gray-700 text-lg my-1"
                         onClick={() => {
                           setSelectedDoctorId(appointment.doctorId._id);
                           setShowReviewModal(true);
