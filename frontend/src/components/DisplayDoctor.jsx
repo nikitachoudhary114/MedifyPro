@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const DisplayDoctor = ({ speciality }) => {
+const DisplayDoctor = ({ speciality, searchTerm, filters }) => {
   const [number, setNumber] = useState(10); // Number of doctors to display
   const [doctors, setDoctors] = useState([]); // State to store doctors
   const [loading, setLoading] = useState(true); // Loading state
@@ -13,40 +13,47 @@ const DisplayDoctor = ({ speciality }) => {
     navigate(`/doctors/${doc._id}`);
   };
 
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+
+      // Combine search and filter parameters
+      const params = {
+        ...(searchTerm && { name: searchTerm }),
+        ...(speciality && { speciality }),
+        ...(filters?.rating && { rating: filters.rating }),
+        ...(filters?.maxFees && { maxFees: filters.maxFees }),
+        ...(filters?.availability !== undefined && {
+          availability: filters.availability,
+        }),
+      };
+
+      console.log("Fetching doctors with params:", params);
+
+      const response = await axios.post(
+        "http://localhost:8080/api/search-filter",
+        params
+      );
+
+      setDoctors(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+      setDoctors([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          "http://localhost:8080/api/doctor/all",
-          {
-            headers: {
-           
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-            
-            params: speciality ? { speciality } : {}, // Pass speciality only if specified
-          }
-        );
-
-        setDoctors(response.data.data || []); // Update doctors state
-      } catch (error) {
-        console.error("Error fetching doctors:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDoctors();
-  }, [speciality]);
+  }, [speciality, searchTerm, filters]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   if (doctors.length === 0) {
-    return <div>No doctors found for the selected specialty.</div>;
+    return <div>No doctors found for the selected criteria.</div>;
   }
 
   return (

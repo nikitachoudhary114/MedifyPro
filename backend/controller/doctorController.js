@@ -8,14 +8,14 @@ import appointmentModel from "../model/appointmentModel.js";
 
 const getAllDoctors = async (req, res) => {
   try {
-    const { speciality } = req.query; 
+    const { speciality } = req.query;
 
     const query = {};
     if (speciality) {
-      query.speciality = speciality; 
+      query.speciality = speciality;
     }
 
-    const doctors = await doctorModel.find(query); 
+    const doctors = await doctorModel.find(query);
     res.json({ success: true, data: doctors });
   } catch (error) {
     console.log(error);
@@ -59,7 +59,7 @@ const addDoctor = async (req, res) => {
 
     // Check if an image was uploaded
     // const imageUrl = req.file ? req.file.path : null;
-    
+
     if (!req.file) {
       return res.status(400).json({ message: "Image upload failed. Please upload an image." });
     }
@@ -67,7 +67,7 @@ const addDoctor = async (req, res) => {
     const imageUrl = req.file.path; // Cloudinary URL
     console.log("Image URL:", imageUrl);
 
-   
+
 
     // Create doctor
     const newDoctor = new doctorModel({
@@ -230,7 +230,7 @@ const changeDoctorPassword = async (req, res) => {
 const addReview = async (req, res) => {
   try {
     const { review, rating } = req.body;
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const { doctorId } = req.params;
 
     const doctor = await doctorModel.findById(doctorId);
@@ -367,46 +367,40 @@ const avgRating = async (req, res) => {
   }
 };
 
-const search = async (req, res) => {
+const searchAndFilter = async (req, res) => {
   try {
-    const { name, speciality } = req.body;
+    const { name, speciality, rating, maxFees, availability } = req.body;
+
     const query = {};
+
+    // Search by name
     if (name) {
       query.name = { $regex: name, $options: "i" };
     }
+
+    // Search by speciality
     if (speciality) {
       query.speciality = { $regex: speciality, $options: "i" };
     }
-    const doctors = await doctorModel.find(query);
-    if (!doctors) {
-      res.status(404).json({ message: "No doctors found" });
-    }
-    res.status(200).json({ success: true, data: doctors });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
 
-const filter = async (req, res) => {
-  try {
-    const { rating, maxFees, availability } = req.body;
-
-    const query = {};
-
+    // Filter by rating
     if (rating) {
       query["reviews.rating"] = { $gte: rating };
     }
 
+    // Filter by max fees
     if (maxFees) {
       query.fees = { $lte: maxFees };
     }
 
+    // Filter by availability
     if (availability !== undefined) {
       query.availability = availability;
     }
 
+    // Fetch doctors based on the combined query
     const doctors = await doctorModel.find(query);
+
     if (doctors.length === 0) {
       return res
         .status(404)
@@ -451,7 +445,7 @@ const signUp = async (req, res) => {
       return res
         .status(409)
         .json({
-          success:false,
+          success: false,
           message: "Doctor already exists with this email"
         });
     }
@@ -467,7 +461,7 @@ const signUp = async (req, res) => {
         message: "please enter a password with 8+ characters",
       });
     }
-    
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -480,7 +474,7 @@ const signUp = async (req, res) => {
     const doctor = await newDoctor.save();
     const token = createToken(doctor._id);
 
-    res.status(200).json({success: true, message: "Doctor registered", token})
+    res.status(200).json({ success: true, message: "Doctor registered", token })
 
   } catch (error) {
     console.log(error);
@@ -491,7 +485,7 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const doctor = await doctorModel.findOne({email});
+    const doctor = await doctorModel.findOne({ email });
     if (!doctor) {
       return res.status(404).json({
         success: false,
@@ -510,7 +504,7 @@ const login = async (req, res) => {
     console.log(error);
     res.status(500).json({ success: false, message: "Error" });
   }
- 
+
 };
 
 const logout = async (req, res) => {
@@ -533,8 +527,7 @@ export {
   updatReview,
   deleteReview,
   avgRating,
-  search,
-  filter,
+  searchAndFilter,
   deleteDoctor,
   signUp,
   login,

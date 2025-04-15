@@ -1,73 +1,78 @@
-import React, { useState } from "react";
-import { specialityData } from "../assets/assets";
-import DisplayDoctor from "./DisplayDoctor";
+import { useState, useEffect } from "react";
 import debounce from "lodash.debounce";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import axios from "axios";
 
-const SpecialityOption = () => {
-  const [speciality, setSpeciality] = useState(""); // State to store selected specialty
-  const [searchTerm, setSearchTerm] = useState(""); // State for search term
-  const [filters, setFilters] = useState({}); // State for filters
-  const [showFilters, setShowFilters] = useState(false); // State to toggle filters
-  const [expandedFilter, setExpandedFilter] = useState(null); // State to toggle individual filter sections
+const DoctorFilter = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [rating, setRating] = useState("");
+  const [maxFees, setMaxFees] = useState(2000);
+  const [availability, setAvailability] = useState("any");
+  const [showFilters, setShowFilters] = useState(false);
+  const [expandedFilter, setExpandedFilter] = useState(null);
+  const [doctors, setDoctors] = useState([]);
 
-  const handleSpecialityClick = (selectedSpeciality) => {
-    if (speciality === selectedSpeciality) {
-      setSpeciality(""); // Reset to display all doctors
-    } else {
-      setSpeciality(selectedSpeciality); // Set the selected specialty
-    }
-  };
-
-  const handleSearchChange = debounce((value) => {
-    setSearchTerm(value);
+  // Debounced search
+  const debouncedSearch = debounce((value) => {
+    fetchDoctors({ searchTerm: value, rating, maxFees, availability });
   }, 400);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters((prevFilters) => ({ ...prevFilters, ...newFilters }));
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    debouncedSearch(e.target.value);
   };
 
   const toggleFilter = (filterName) => {
     setExpandedFilter(expandedFilter === filterName ? null : filterName);
   };
 
+  const fetchDoctors = async (filters) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/search-filter",
+        filters
+      );
+        setDoctors(response.data.data);
+        console.log(doctors)
+        console.log(filters)
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+      setDoctors([]);
+    }
+    };
+    
+
+
+  useEffect(() => {
+    fetchDoctors({ searchTerm, rating, availability, maxFees });
+  },[]);
+
   return (
-    <div>
-      <div>
-        <h1 className="text-center text-3xl pt-14 mb-3 font-semibold">
-          Find by Speciality
-        </h1>
-        <p className="text-center text-primary">
-          Simply browse through our extensive list of trusted doctors, schedule
-          <br />
-          your appointment hassle-free.
-        </p>
-      </div>
-
-      <div className="w-full px-4 mt-6 flex justify-center">
-        <div className="flex  items-center space-x-4">
-          <div className="relative w-full sm:w-96">
-            <input
-              type="text"
-              placeholder="Search doctor or speciality..."
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <FaSearch className="absolute top-3 right-4 text-gray-400" />
-          </div>
-
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="bg-violet-500 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
-          >
-            <FaFilter />
-            {showFilters ? "Hide Filters" : "Show Filters"}
-          </button>
+    <div className="w-full px-4 mt-6">
+      {/* Search Input and Filters Button */}
+      <div className="flex justify-between items-center space-x-4">
+        <div className="relative w-full sm:w-96">
+          <input
+            type="text"
+            placeholder="Search doctor or speciality..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+          />
+          <FaSearch className="absolute top-3 right-4 text-gray-400" />
         </div>
+
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="bg-violet-500 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        >
+          <FaFilter />
+          {showFilters ? "Hide Filters" : "Show Filters"}
+        </button>
       </div>
 
-      {/* Filter Options */}
+      {/* Filters Panel */}
       {showFilters && (
         <div className="mt-6 bg-white p-4 rounded-xl shadow-lg">
           {/* Rating Filter */}
@@ -91,15 +96,13 @@ const SpecialityOption = () => {
                       type="radio"
                       name="rating"
                       value={r}
-                      checked={filters.rating === r}
-                      onChange={() => handleFilterChange({ rating: r })}
+                      checked={rating == r}
+                      onChange={(e) => setRating(e.target.value)}
                       className="hidden"
                     />
                     <span
                       className={`text-4xl ${
-                        filters.rating >= r
-                          ? "text-yellow-500"
-                          : "text-gray-300"
+                        rating >= r ? "text-yellow-500" : "text-gray-300"
                       }`}
                     >
                       ★
@@ -128,19 +131,15 @@ const SpecialityOption = () => {
             {expandedFilter === "maxFees" && (
               <div className="mt-4 px-4">
                 <div className="text-center text-sm font-medium text-gray-700 mb-2">
-                  Selected: ₹{filters.maxFees || 2000}
+                  Selected: ₹{maxFees}
                 </div>
                 <input
                   type="range"
                   min="200"
                   max="2000"
                   step="100"
-                  value={filters.maxFees || 2000}
-                  onChange={(e) =>
-                    handleFilterChange({
-                      maxFees: parseInt(e.target.value, 10),
-                    })
-                  }
+                  value={maxFees}
+                  onChange={(e) => setMaxFees(e.target.value)}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
                 />
                 <div className="flex justify-between text-sm text-gray-600 mt-2">
@@ -173,8 +172,8 @@ const SpecialityOption = () => {
                     type="radio"
                     name="availability"
                     value="any"
-                    checked={filters.availability === "any"}
-                    onChange={() => handleFilterChange({ availability: "any" })}
+                    checked={availability === "any"}
+                    onChange={(e) => setAvailability(e.target.value)}
                     className="w-4 h-4 text-violet-500 border-gray-300 focus:ring-violet-500"
                   />
                   <span className="text-sm text-gray-700">Any Available</span>
@@ -184,8 +183,8 @@ const SpecialityOption = () => {
                     type="radio"
                     name="availability"
                     value="true"
-                    checked={filters.availability === true}
-                    onChange={() => handleFilterChange({ availability: true })}
+                    checked={availability === "true"}
+                    onChange={(e) => setAvailability(e.target.value)}
                     className="w-4 h-4 text-violet-500 border-gray-300 focus:ring-violet-500"
                   />
                   <span className="text-sm text-gray-700">Available Now</span>
@@ -196,34 +195,36 @@ const SpecialityOption = () => {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-8 justify-center my-14">
-        {specialityData.map((doc, ind) => (
-          <div
-            key={ind}
-            onClick={() => handleSpecialityClick(doc.speciality)}
-            className={`flex flex-col items-center cursor-pointer`}
-          >
-            <img
-              src={doc.image}
-              alt={doc.speciality}
-              className={`w-20 h-20 rounded-full mb-4 ${
-                speciality === doc.speciality
-                  ? "border-2 border-violet-400 rounded-full p-2"
-                  : ""
-              }`}
-            />
-            <h3 className="text-primary">{doc.speciality}</h3>
+      {/* Doctors List */}
+      <div className="mt-6">
+        {doctors.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {doctors.map((doctor) => (
+              <div
+                key={doctor._id}
+                className="p-4 border rounded-lg shadow hover:shadow-lg transition"
+              >
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {doctor.name}
+                </h3>
+                <p className="text-sm text-gray-600">{doctor.speciality}</p>
+                <p className="text-sm text-gray-600">Fees: ₹{doctor.fees}</p>
+                <p
+                  className={`text-sm ${
+                    doctor.availability ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {doctor.availability ? "Available" : "Not Available"}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <p className="text-center text-gray-600">No doctors found.</p>
+        )}
       </div>
-
-      <DisplayDoctor
-        speciality={speciality}
-        searchTerm={searchTerm}
-        filters={filters}
-      />
     </div>
   );
 };
 
-export default SpecialityOption;
+export default DoctorFilter;

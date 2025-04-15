@@ -12,7 +12,6 @@ import {
   updateDoctorAvailabity,
   getReview,
   updatReview,
-  filter,
   deleteDoctor,
   signUp,
   login,
