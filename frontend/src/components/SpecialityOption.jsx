@@ -45,12 +45,12 @@ const SpecialityOption = () => {
         </p>
       </div>
 
-      <div className="w-full px-4 mt-6 flex justify-center">
-        <div className="flex  items-center space-x-4">
-          <div className="relative w-full sm:w-96">
+      <div className="w-full px-4 mt-6">
+        <div className="flex justify-center items-center space-x-4">
+          <div className="relative w-1/2 sm:w-96">
             <input
               type="text"
-              placeholder="Search doctor or speciality..."
+              placeholder="Search doctor ..."
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
@@ -69,7 +69,7 @@ const SpecialityOption = () => {
 
       {/* Filter Options */}
       {showFilters && (
-        <div className="mt-6 bg-white p-4 rounded-xl shadow-lg">
+        <div className="w-2/3 mx-auto mt-6 bg-white p-4 rounded-xl shadow-lg">
           {/* Rating Filter */}
           <div className="border-b border-gray-200 pb-4 mb-4">
             <div
@@ -157,7 +157,7 @@ const SpecialityOption = () => {
               className="flex justify-between items-center cursor-pointer hover:text-violet-600"
               onClick={() => toggleFilter("availability")}
             >
-              <span className="text-base font-semibold text-gray-800">
+              <span className="text-sm font-medium text-gray-700">
                 Availability
               </span>
               {expandedFilter === "availability" ? (
@@ -168,28 +168,22 @@ const SpecialityOption = () => {
             </div>
             {expandedFilter === "availability" && (
               <div className="mt-4 space-y-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="availability"
-                    value="any"
-                    checked={filters.availability === "any"}
-                    onChange={() => handleFilterChange({ availability: "any" })}
-                    className="w-4 h-4 text-violet-500 border-gray-300 focus:ring-violet-500"
-                  />
-                  <span className="text-sm text-gray-700">Any Available</span>
-                </label>
+               
                 <label className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name="availability"
                     value="true"
-                    checked={filters.availability === true}
-                    onChange={() => handleFilterChange({ availability: true })}
+                    checked={filters.availability === "true"}
+                    onChange={() =>
+                      handleFilterChange({ availability: "true" })
+                    }
                     className="w-4 h-4 text-violet-500 border-gray-300 focus:ring-violet-500"
                   />
                   <span className="text-sm text-gray-700">Available Now</span>
                 </label>
+
+                
               </div>
             )}
           </div>

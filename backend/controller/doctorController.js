@@ -394,9 +394,12 @@ const searchAndFilter = async (req, res) => {
     }
 
     // Filter by availability
-    if (availability !== undefined) {
-      query.availability = availability;
-    }
+    if (availability === "true") {
+      query.availability = true;
+    }// Available Now
+    // } else if (availability === "false") {
+    //   query.availability = false; // Not Available
+    // }
 
     // Fetch doctors based on the combined query
     const doctors = await doctorModel.find(query);

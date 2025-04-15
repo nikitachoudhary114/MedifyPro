@@ -13,36 +13,31 @@ const DisplayDoctor = ({ speciality, searchTerm, filters }) => {
     navigate(`/doctors/${doc._id}`);
   };
 
-  const fetchDoctors = async () => {
-    try {
-      setLoading(true);
+const fetchDoctors = async () => {
+  try {
+    setLoading(true);
 
-      // Combine search and filter parameters
-      const params = {
-        ...(searchTerm && { name: searchTerm }),
-        ...(speciality && { speciality }),
-        ...(filters?.rating && { rating: filters.rating }),
-        ...(filters?.maxFees && { maxFees: filters.maxFees }),
-        ...(filters?.availability !== undefined && {
-          availability: filters.availability,
-        }),
-      };
+    const params = {
+      ...(searchTerm && { name: searchTerm }),
+      ...(speciality && { speciality }),
+      ...(filters?.rating && { rating: filters.rating }),
+      ...(filters?.maxFees && { maxFees: filters.maxFees }),
+      ...(filters?.availability && { availability: filters.availability }),
+    };
 
-      console.log("Fetching doctors with params:", params);
+    const response = await axios.post(
+      "http://localhost:8080/api/search-filter",
+      params
+    );
 
-      const response = await axios.post(
-        "http://localhost:8080/api/search-filter",
-        params
-      );
-
-      setDoctors(response.data.data || []);
-    } catch (error) {
-      console.error("Error fetching doctors:", error);
-      setDoctors([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setDoctors(response.data.data || []);
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    setDoctors([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchDoctors();
