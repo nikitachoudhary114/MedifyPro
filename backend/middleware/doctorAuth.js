@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import userModel from "../model/userModel.js";
 
-export const auth = async (req, res, next) => {
+import doctorModel from "../model/doctorModel.js";
+
+export const docAuth = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
         if (!token) {
@@ -9,14 +10,14 @@ export const auth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findById(decoded.id);
+        const doctor = await doctorModel.findById(decoded.id);
 
 
-        if (!user) {
+        if (!doctor) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        req.user = user; // Attach user to the request
+        req.doctor = doctor; // Attach user to the request
         next();
     } catch (error) {
         console.error("Authentication error:", error);

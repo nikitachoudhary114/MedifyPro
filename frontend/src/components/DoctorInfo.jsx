@@ -213,7 +213,7 @@ const DoctorInfo = () => {
           doctorId: id,
           date: selectedDate,
           time: selectedTime,
-          status: "Pending",
+          status: "Confirmed",
         },
         {
           headers: {
@@ -224,6 +224,7 @@ const DoctorInfo = () => {
       toast.success(
         response.data.message || "Appointment booked successfully!"
       );
+      navigate('/appointment');
     } catch (error) {
       const message =
         error?.response?.data?.message ||

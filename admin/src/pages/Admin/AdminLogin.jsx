@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,6 +6,13 @@ import { toast } from "react-toastify";
 const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+
+  // Redirect based on token presence
+  useEffect(() => {
+    if (localStorage.getItem("adminToken")) {
+      navigate("/admin/dashboard"); // Redirect to admin dashboard
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

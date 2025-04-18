@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
@@ -8,6 +8,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+   useEffect(() => {
+      if (localStorage.getItem("token")) {
+        navigate("/doctor/dashboard"); // Redirect to admin dashboard
+      }
+    }, [navigate]);
 
   const handleLogin = async () => {
     try {

@@ -1,6 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import adminModel from "../model/adminModel.js";
+import doctorModel from "../model/doctorModel.js";
+import userModel from "../model/userModel.js";
+import appointmentModel from "../model/appointmentModel.js";
+import mongoose from "mongoose";
 
 const createToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -46,6 +50,151 @@ export const registerAdmin = async (req, res) => {
     } catch (error) {
         console.error("Error registering admin:", error);
         res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+//admin dashboard
+export const adminDashboardDetails = async (req, res) => {
+    try {
+        const totalDoctors = await doctorModel.countDocuments();
+        const totalPatients = await userModel.countDocuments();
+        const totalAppointments = await appointmentModel.countDocuments();
+        const doctorsBySpeciality = await doctorModel.aggregate([
+            { $group: { _id: "$speciality", count: { $sum: 1 } } }
+        ]);
+
+        const appointmentsByMonth = await appointmentModel.aggregate([
+            {
+            $group: {
+                _id: { $month: "$date" },
+                count: { $sum: 1 }
+            }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        
+        const highestAppointmentDoctors = await appointmentModel.aggregate([
+            {
+            $lookup: {
+                from: "doctors",
+                localField: "doctorId",
+                foreignField: "_id",
+                as: "doctorDetails"
+            }
+            },
+            { $unwind: "$doctorDetails" },
+            {
+            $group: {
+                _id: "$doctorDetails.speciality",
+                doctor: {
+                $first: "$doctorDetails.name"
+                },
+                image: {
+                $first: "$doctorDetails.image"
+                },
+                appointmentCount: { $sum: 1 }
+            }
+            },
+            { $sort: { appointmentCount: -1 } }
+        ]);
+
+        const latestAppointments = await appointmentModel
+            .find()
+            .sort({ date: -1 })
+            .limit(10)
+            .populate("doctorId", "name speciality")
+            .populate("patientId", "name image ");
+
+        res.status(200).json({
+            totalDoctors,
+            totalPatients,
+            totalAppointments,
+            doctorsBySpeciality,
+            appointmentsByMonth,
+            highestAppointmentDoctors,
+            latestAppointments
+        });
+    } catch (error) {
+        console.error("Error fetching dashborad details:", error);
+        res.status(500).json({ message: "Server error", error });
+    }
+}
+
+
+export const doctorDashboardDetails = async (req, res) => {
+    try {
+        const doctorId = req.doctor._id; // Assuming the doctor is authenticated and their ID is available in req.doctor
+
+        // Total Appointments
+        const totalAppointments = await appointmentModel.countDocuments({ doctorId });
+
+        // Latest Appointments
+        const latestAppointments = await appointmentModel
+            .find({ doctorId })
+            .sort({ date: -1 })
+            .limit(10)
+            .populate("patientId", "name image")
+            .populate("doctorId", "fees");
+
+        // Calculate revenue for appointments with status other than "Cancelled"
+        const revenueFromNonCancelledAppointments = await appointmentModel.aggregate([
+            {
+                $match: {
+                    doctorId: new mongoose.Types.ObjectId(doctorId),
+                    status: { $ne: "Cancelled" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "doctors", // Assuming your doctors collection name
+                    localField: "doctorId",
+                    foreignField: "_id",
+                    as: "doctorInfo"
+                }
+            },
+            { $unwind: "$doctorInfo" },
+            { $group: { _id: null, totalFees: { $sum: "$doctorInfo.fees" } } }
+        ]);
+        // Revenue by Month
+        const revenueByMonth = await appointmentModel.aggregate([
+            {
+            $match: {
+                doctorId: new mongoose.Types.ObjectId(doctorId),
+                status: { $ne: "Cancelled" }
+            }
+            },
+            {
+            $lookup: {
+                from: "doctors",
+                localField: "doctorId",
+                foreignField: "_id",
+                as: "doctorInfo"
+            }
+            },
+            { $unwind: "$doctorInfo" },
+            {
+            $group: {
+                _id: { $month: "$date" },
+                totalFees: { $sum: "$doctorInfo.fees" }
+            }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+        const totalRevenue = revenueFromNonCancelledAppointments.length > 0
+            ? revenueFromNonCancelledAppointments[0].totalFees
+            : 0;
+
+        res.status(200).json({
+            totalAppointments,
+            totalRevenue,
+            latestAppointments,
+            revenueByMonth
+        });
+    } catch (error) {
+        console.error("Error fetching doctor dashboard details:", error);
+        res.status(500).json({ message: "Server error", error });
     }
 };
 

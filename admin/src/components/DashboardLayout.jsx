@@ -9,12 +9,10 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const doctorToken = localStorage.getItem("token");
-    const adminToken = localStorage.getItem("adminToken");
 
-    if (doctorToken) {
+    if (localStorage.getItem("token")) {
       setRole("doctor");
-    } else if (adminToken) {
+    } else if (localStorage.getItem("adminToken")) {
       setRole("admin");
     }
   }, [navigate]);
@@ -29,7 +27,7 @@ const DashboardLayout = () => {
         navigate("/");
       } else if (role === "admin") {
         await axios.post(`http://localhost:8080/api/admin/logout`);
-        localStorage.removeItem("admintoken");
+        localStorage.removeItem("adminToken");
  toast.success("Logout Successfully");
         navigate("/");
       }
