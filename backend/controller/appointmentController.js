@@ -1,6 +1,7 @@
 import appointmentModel from "../model/appointmentModel.js";
 import doctorModel from "../model/doctorModel.js";
 import userModel from "../model/userModel.js";
+import { sendAppointmentEmail } from "../servies/emailService.js";
 
 const createAppointment = async (req, res) => {
   try {
@@ -9,20 +10,15 @@ const createAppointment = async (req, res) => {
     if (!doctorId || !date || !time || !status) {
       return res.status(400).json({ message: "All fields are required." });
     }
-
-    // Extract patient ID from the authenticated user (via auth middleware)
     const patientId = req.user.id;
-    // Check if the doctor exists
     const doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
-    // Check if the patient exists
     const patient = await userModel.findById(patientId);
     if (!patient) {
       return res.status(404).json({ message: "Patient not found" });
     }
-    // Check if the appointment time is available
     const existingAppointment = await appointmentModel.findOne({
       doctorId,
       date, 
@@ -41,6 +37,23 @@ const createAppointment = async (req, res) => {
     });
 
     const savedAppointment = await newAppointment.save();
+
+
+    const doctorName = doctor.name;
+   
+
+
+    await sendAppointmentEmail({
+      name: patient.name,
+      to_email: patient.email,
+      notification_message: `Your appointment has been successfully booked! 🎉`,
+      doctor_name: doctorName,
+      appointment_date: date,
+      appointment_time: time,
+      clinic_location:`MedifyPro Clinic 101, Serenity Plaza Baner Road, Baner <br>
+                        Pune, Maharashtra 411045 <br>
+                        Phone: +91 98765 43210`,
+    });
 
     res.status(201).json({
       message: "Appointment Created Successfully",
@@ -107,6 +120,23 @@ const updateAppointment = async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
+
+    const appointment = await appointmentModel.findById(appointmentId).populate('doctorId').populate('patientId');
+    await sendAppointmentEmail({
+      name: appointment.patientId.name,
+      to_email: appointment.patientId.email,
+      notification_message: `Your appointment has been updated. 📝`,
+      doctor_name: appointment.doctorId.name,
+      appointment_date: date,
+      appointment_time: time,
+      clinic_location: `MedifyPro Clinic <br> 
+101, Serenity Plaza <br> 
+Baner Road, Baner <br> 
+Pune, Maharashtra 411045 <br> 
+Phone: +91 98765 43210`
+
+    });
+
     res.status(200).json({ message: "Appointment updated successfully" });
   } catch (error) {
     console.log(error);
@@ -133,6 +163,23 @@ const changeAppointmentStatus = async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
+    if (status === "Cancelled") {
+      const appointment = await appointmentModel.findById(appointmentId).populate('doctorId').populate('patientId');
+
+      await sendAppointmentEmail({
+        name: appointment.patientId.name,
+        to_email: appointment.patientId.email,
+        notification_message: `Your appointment has been cancelled by the clinic. ❌`,
+        doctor_name: appointment.doctorId.name,
+        appointment_date: appointment.date,
+        appointment_time: appointment.time,
+        clinic_location: `MedifyPro Clinic 101, Serenity Plaza Baner Road, Baner <br>
+                        Pune, Maharashtra 411045 <br>
+                        Phone: +91 98765 43210`
+      });
+    }
+
+
     res
       .status(200)
       .json({
@@ -151,6 +198,26 @@ const deleteAppointment = async (req, res) => {
     const deletedAppointment = await appointmentModel.findByIdAndDelete(
       appointmentId
     );
+
+
+    const appointment = deletedAppointment; // deletedAppointment still has the old appointment data
+
+    const doctor = await doctorModel.findById(appointment.doctorId);
+    const patient = await userModel.findById(appointment.patientId);
+
+    await sendAppointmentEmail({
+      name: patient.name,
+      to_email: patient.email,
+      notification_message: `Your appointment has been cancelled. ❌`,
+      doctor_name: doctor.name,
+      appointment_date: appointment.date,
+      appointment_time: appointment.time,
+      clinic_location: `MedifyPro Clinic 101, Serenity Plaza Baner Road, Baner 
+                        Pune, Maharashtra 411045 
+                        Phone: +91 98765 43210`,
+    });
+
+
     res
       .status(200)
       .json({

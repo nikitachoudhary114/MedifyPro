@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -10,80 +10,74 @@ const Appointment = () => {
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // Fetch appointments for the user
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  // Fetch all appointments
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/appointments/user`,
+      const { data } = await axios.get(
+        "http://localhost:8080/api/appointments/user",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (response.data.patientAppointments) {
-        setAppointments(response.data.patientAppointments);
-        console.log(appointments);
+      if (data.patientAppointments) {
+        setAppointments(data.patientAppointments);
       } else {
         toast.error("Failed to fetch appointments");
       }
     } catch (error) {
-      console.log("Error fetching appointments:", error);
+      console.error("Error fetching appointments:", error);
       toast.error("An error occurred while fetching appointments.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Delete an appointment
+  // Delete appointment
   const deleteAppointment = async (appointmentId) => {
     try {
-      const response = await axios.delete(
+      const { data } = await axios.delete(
         `http://localhost:8080/api/appointments/${appointmentId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (response.data.message) {
-        toast.success(response.data.message);
-        // Remove the deleted appointment from the UI
-        setAppointments((prevAppointments) =>
-          prevAppointments.filter(
-            (appointment) => appointment._id !== appointmentId
-          )
-        );
+      if (data.message) {
+        toast.success(data.message);
+        setAppointments((prev) => prev.filter((a) => a._id !== appointmentId));
       } else {
         toast.error("Failed to delete appointment");
       }
     } catch (error) {
-      console.log("Error deleting appointment:", error);
+      console.error("Error deleting appointment:", error);
       toast.error("An error occurred while deleting the appointment.");
     }
   };
 
-  // Add a review for a doctor
+  // Submit review
   const submitReview = async () => {
     try {
-      const response = await axios.post(
+      const { data } = await axios.post(
         `http://localhost:8080/api/doctor/${selectedDoctorId}/review`,
         { review, rating },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data.message) {
-        toast.success(response.data.message);
+      if (data.message) {
+        toast.success(data.message);
         setShowReviewModal(false);
         setReview("");
         setRating(0);
@@ -91,48 +85,65 @@ const Appointment = () => {
         toast.error("Failed to add review");
       }
     } catch (error) {
-      const errorMessage =
+      const msg =
         error.response?.data?.message ||
         "An error occurred while adding the review.";
-      toast.error(errorMessage);
+      toast.error(msg);
     }
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
+  // Update appointment
+  const updateAppointment = async () => {
+    try {
+      const { data } = await axios.put(
+        `http://localhost:8080/api/user/${selectedAppointmentId}`,
+        { date: newDate, time: newTime },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
+      if (data.success) {
+        toast.success("Appointment updated successfully!");
+        setShowUpdateModal(false);
+        fetchAppointments();
+      } else {
+        toast.error("Failed to update appointment");
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        "An error occurred while updating appointment.";
+      toast.error(msg);
+    }
+  };
+
+  // Initiate Razorpay payment
   const initPay = (order) => {
     const options = {
       key: "rzp_test_VuXL9xKSfucJ3D",
       amount: order.amount,
       currency: order.currency,
       name: "Appointment Payment",
-      description: "payment for the appointment of patient with doctor",
+      description: "Payment for doctor appointment",
       order_id: order.id,
-      recipt: order.recipt,
       handler: async (response) => {
-        console.log(response);
-
         try {
           const { data } = await axios.post(
             `http://localhost:8080/api/user/verify`,
             response,
             { headers: { Authorization: `Bearer ${token}` } }
           );
+
           if (data.success) {
             fetchAppointments();
             navigate("/appointment");
           }
         } catch (error) {
-          console.log(error);
           toast.error(error.message);
         }
       },
     };
 
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    new window.Razorpay(options).open();
   };
 
   const appointmentRazorpay = async (appointmentId) => {
@@ -140,20 +151,13 @@ const Appointment = () => {
       const { data } = await axios.post(
         `http://localhost:8080/api/user/payment`,
         { appointmentId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (data.success) {
-        initPay(data.order);
-      }
-      // console.log(data)
+      if (data.success) initPay(data.order);
     } catch (error) {
-      console.log("Error in payment of appointment:", error);
-      toast.error("An error occurred while payment of appointment.");
+      console.error("Error in appointment payment:", error);
+      toast.error("An error occurred during appointment payment.");
     }
   };
 
@@ -162,119 +166,170 @@ const Appointment = () => {
   }
 
   return (
-    <div>
-      <h2 className="text-xl p-3 mt-14 font-semibold">My Appointments</h2>
+    <div className="p-4 mt-14">
+      <h2 className="text-xl font-semibold mb-2">My Appointments</h2>
       <hr />
-      <div>
-        {appointments.length === 0 ? (
-          <p className="text-center mt-6">No Appointments found.</p>
-        ) : (
-          appointments.map((appointment, ind) => (
-            <div key={ind}>
-              <div className="flex flex-col md:flex-row justify-between items-center gap-2 my-6">
-                <div className="flex">
-                  <div>
-                    <img
-                      src={appointment.doctorId.image}
-                      className="w-44 bg-[#eaefff] mx-4"
-                      alt="Doctor"
-                    />
-                  </div>
 
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {appointment.doctorId.name}
-                    </h2>
-                    <h2 className="mb-3">{appointment.doctorId.speciality}</h2>
-                    <p className="text-blue-800 mb-1">
-                      Fees: &#x20B9;{appointment.doctorId.fees}
-                    </p>
-                    <p className="text-gray-600 font-medium">
-                      Date: {new Date(appointment.date).toLocaleDateString()}
-                    </p>
-                    <p className="text-gray-600 font-medium">
-                      Time: {appointment.time}
-                    </p>
-                  </div>
-                </div>
+      {appointments.length === 0 ? (
+        <p className="text-center mt-6">No Appointments found.</p>
+      ) : (
+        appointments.map((appointment, ind) => (
+          <div key={ind} className="my-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              {/* Doctor Info */}
+              <div className="flex gap-4">
+                <img
+                  src={appointment.doctorId.image}
+                  className="w-44 bg-[#eaefff] rounded"
+                  alt="Doctor"
+                />
                 <div>
-                  {appointment.payment ? (
-                    <>
-                      <button
-                        className="w-3/4 p-2 bg-slate-200 text-gray-700 text-lg my-1"
-                        onClick={() => {
-                          setSelectedDoctorId(appointment.doctorId._id);
-                          setShowReviewModal(true);
-                        }}
-                      >
-                        Add Review
-                      </button>
-                    </>
-                  ) : (
+                  <h2 className="text-xl font-semibold">
+                    {appointment.doctorId.name}
+                  </h2>
+                  <p className="text-gray-700">
+                    {appointment.doctorId.speciality}
+                  </p>
+                  <p className="text-blue-800 font-medium mt-2">
+                    Fees: ₹{appointment.doctorId.fees}
+                  </p>
+                  <p className="text-gray-600">
+                    Date: {new Date(appointment.date).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-600">Time: {appointment.time}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
+                {appointment.payment ? (
+                  <button
+                    className="w-3/4 p-2 bg-slate-200 text-gray-700"
+                    onClick={() => {
+                      setSelectedDoctorId(appointment.doctorId._id);
+                      setShowReviewModal(true);
+                    }}
+                  >
+                    Add Review
+                  </button>
+                ) : (
+                  <>
                     <button
-                      className="w-3/4 p-2 hover:bg-violet-600 bg-custom-bg text-white text-lg my-1"
+                      className="w-3/4 p-2 bg-custom-bg hover:bg-violet-600 text-white"
                       onClick={() => appointmentRazorpay(appointment._id)}
                     >
                       Pay here
                     </button>
-                  )}
-                  <button
-                    onClick={() => deleteAppointment(appointment._id)}
-                    className="mt-1 border border-red-500 text-red-500 hover:bg-red-500 w-3/4 p-2 hover:text-white text-lg my-1 transition-all duration-300"
-                  >
-                    Cancel Appointment
-                  </button>
-                </div>
+                    <button
+                      className="w-3/4 p-2 bg-blue-500 hover:bg-blue-600 text-white"
+                      onClick={() => {
+                        setSelectedAppointmentId(appointment._id);
+                        setShowUpdateModal(true);
+                      }}
+                    >
+                      Update date and time
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => deleteAppointment(appointment._id)}
+                  className="w-3/4 p-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                >
+                  Cancel Appointment
+                </button>
               </div>
-              <hr />
             </div>
-          ))
-        )}
-      </div>
+            <hr className="mt-6" />
+          </div>
+        ))
+      )}
+
+      {/* Update Modal */}
+      {showUpdateModal && (
+        <Modal
+          title="Update Appointment"
+          onClose={() => setShowUpdateModal(false)}
+        >
+          <input
+            type="date"
+            className="w-full p-2 border rounded mb-4"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+          />
+          <input
+            type="time"
+            className="w-full p-2 border rounded mb-4"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-4 py-2 bg-gray-300 rounded"
+              onClick={() => setShowUpdateModal(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={updateAppointment}
+            >
+              Update
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-semibold mb-4">Add Review</h2>
-            <textarea
-              className="w-full p-2 border rounded mb-4"
-              rows="4"
-              placeholder="Write your review here..."
-              value={review}
-              onChange={(e) => setReview(e.target.value)}
-            ></textarea>
-            <select
-              className="w-full p-2 border rounded mb-4"
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
+        <Modal title="Add Review" onClose={() => setShowReviewModal(false)}>
+          <textarea
+            className="w-full p-2 border rounded mb-4"
+            rows="4"
+            placeholder="Write your review here..."
+            value={review}
+            onChange={(e) => setReview(e.target.value)}
+          />
+          <select
+            className="w-full p-2 border rounded mb-4"
+            value={rating}
+            onChange={(e) => setRating(Number(e.target.value))}
+          >
+            <option value={0}>Select Rating</option>
+            {[1, 2, 3, 4, 5].map((r) => (
+              <option key={r} value={r}>
+                {r} -{" "}
+                {["Poor", "Fair", "Good", "Very Good", "Excellent"][r - 1]}
+              </option>
+            ))}
+          </select>
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-4 py-2 bg-gray-300 rounded"
+              onClick={() => setShowReviewModal(false)}
             >
-              <option value={0}>Select Rating</option>
-              <option value={1}>1 - Poor</option>
-              <option value={2}>2 - Fair</option>
-              <option value={3}>3 - Good</option>
-              <option value={4}>4 - Very Good</option>
-              <option value={5}>5 - Excellent</option>
-            </select>
-            <div className="flex justify-end">
-              <button
-                className="px-4 py-2 bg-gray-300 rounded mr-2"
-                onClick={() => setShowReviewModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={submitReview}
-              >
-                Submit
-              </button>
-            </div>
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={submitReview}
+            >
+              Submit
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
 };
+
+// Modal component reused for review/update
+const Modal = ({ title, children, onClose }) => (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      {children}
+    </div>
+  </div>
+);
 
 export default Appointment;

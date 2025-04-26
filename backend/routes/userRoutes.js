@@ -9,6 +9,7 @@ import {
     logoutUser,
     razorpayPayment,
     registerUser,
+    updateAppointmentTimings,
     verifyRazorpay,
 } from "../controller/userContoller.js";
 import { auth } from "../middleware/auth.js";
@@ -25,7 +26,8 @@ userRouter.post("/register", registerUser); // done
 userRouter.post("/login", loginUser); // done
 userRouter.post("/logout", logoutUser); // done
 userRouter.post("/payment",auth, razorpayPayment); // done
-userRouter.post("/verify",auth, verifyRazorpay); // done
+userRouter.post("/verify", auth, verifyRazorpay); // done
+userRouter.put("/:appointmentId", auth, updateAppointmentTimings)
 
 
 export default userRouter;

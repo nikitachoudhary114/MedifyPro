@@ -246,6 +246,34 @@ const razorpayPayment = async (req, res) => {
   }
 };
 
+const updateAppointmentTimings = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { date, time } = req.body;
+
+    const appointment = await appointmentModel.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+    if (date) {
+      appointment.date = date;
+    }
+
+    if (time) {
+      appointment.time = time;
+    }
+    appointment.save();
+
+    res.status(200).json({ success: true, message: "Appointment timings updated successfully", appointment });
+
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "server error" });
+  }
+}
+
 const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id } = req.body;
@@ -279,5 +307,6 @@ export {
   getSpecificUser,
   deleteUser,
   razorpayPayment,
-  verifyRazorpay
+  verifyRazorpay,
+  updateAppointmentTimings
 };

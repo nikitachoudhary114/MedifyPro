@@ -8,6 +8,7 @@ import doctorRoutes from './routes/doctorRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import {  searchAndFilter } from './controller/doctorController.js';
 import adminRoutes from "./routes/adminRoutes.js";
+import './util/cronScheduler.js'
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/doctor', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 app.post('/api/search-filter', searchAndFilter);
+
 
 
 
