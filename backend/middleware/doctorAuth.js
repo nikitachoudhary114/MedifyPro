@@ -10,11 +10,12 @@ export const docAuth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // console.log("decoded id: "+ decoded)
         const doctor = await doctorModel.findById(decoded.id);
-
+// console.log(doctor)
 
         if (!doctor) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: `doctor not found ` });
         }
 
         req.doctor = doctor; // Attach user to the request

@@ -19,6 +19,7 @@ import {
   changeDoctorPassword,
 } from "../controller/doctorController.js";
 import { upload } from "../util/cloudinary.js";
+import { docAuth } from "../middleware/doctorAuth.js";
 const doctorRoutes = express.Router();
 
 doctorRoutes.post("/signup", signUp);//done
@@ -26,11 +27,11 @@ doctorRoutes.post("/login", login);//done
 doctorRoutes.post("/logout", logout);//done
 
 doctorRoutes.post("/add", upload.single("image"), addDoctor);//done
-doctorRoutes.get("/all", auth, getAllDoctors); 
-doctorRoutes.get("/:doctorId", auth, getDocById);//done
-doctorRoutes.post('/:doctorId/update-password', auth, changeDoctorPassword);//done
-doctorRoutes.delete("/:doctorId", auth, deleteDoctor);//done
-doctorRoutes.put("/:doctorId/", auth, updateDocProfile);//done
+doctorRoutes.get("/all", getAllDoctors); 
+doctorRoutes.get("/:doctorId", getDocById);//done
+doctorRoutes.post('/:doctorId/update-password', docAuth, changeDoctorPassword);//done
+doctorRoutes.delete("/:doctorId", deleteDoctor);//done
+doctorRoutes.put("/:doctorId/", docAuth, updateDocProfile);//done
 doctorRoutes.post("/:doctorId/available", auth, updateDoctorAvailabity);//done
 doctorRoutes.get("/:doctorId/available-slots", auth, getDoctorAvailability);
 

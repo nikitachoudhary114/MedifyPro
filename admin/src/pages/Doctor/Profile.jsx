@@ -36,9 +36,11 @@ const Profile = () => {
         );
         setDoctor(response.data.doctor);
         setFormData(response.data.doctor);
-        setIsAvailable(response.data.doctor.availability); // Set availability
+        setIsAvailable(response.data.doctor.availability);
+        // Set availability
       } catch (error) {
         console.error("Error fetching doctor profile:", error);
+        toast.error(error)
       }
     };
 

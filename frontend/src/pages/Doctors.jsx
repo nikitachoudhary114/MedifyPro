@@ -13,11 +13,7 @@ const Doctors = () => {
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/api/doctor/all", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get("http://localhost:8080/api/doctor/all")
 
       if (response.data.success) {
         setDoctors(response.data.data); // Set doctors from the backend
