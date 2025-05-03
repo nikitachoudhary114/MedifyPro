@@ -104,7 +104,8 @@ const getProfile = async (req, res) => {
         address: user.address,
         dob: user.dob,
         gender: user.gender,
-        image: user.image, // Include the image field
+        image: user.image,
+        emergencyContacts: user.emergencyContacts || []
       },
     });
   } catch (error) {
@@ -112,6 +113,7 @@ const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching profile" });
   }
 };
+
 
 
 const editProfile = async (req, res) => {
@@ -297,6 +299,51 @@ const verifyRazorpay = async (req, res) => {
   }
 }
 
+const addEmergencyContact = async (req, res) => {
+  const userId = req.user.id;
+  const { name, phone } = req.body;
+
+  if (!name || !phone) {
+    return res.status(400).json({ message: "Name and phone number are both required" });
+  }
+
+  try {
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          emergencyContacts: { name, phone }
+        }
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Emergency contact added successfully!",
+      emergencyContacts: user.emergencyContacts
+    });
+
+  } catch (error) {
+    console.error("Error adding emergency contact:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+const sos = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: "server error"})
+  }
+}
+
 export {
   loginUser,
   registerUser,
@@ -308,5 +355,7 @@ export {
   deleteUser,
   razorpayPayment,
   verifyRazorpay,
-  updateAppointmentTimings
+  updateAppointmentTimings,
+  sos,
+  addEmergencyContact
 };

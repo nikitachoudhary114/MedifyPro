@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    addEmergencyContact,
     allUsers,
     deleteUser,
     editProfile,
@@ -9,6 +10,7 @@ import {
     logoutUser,
     razorpayPayment,
     registerUser,
+    sos,
     updateAppointmentTimings,
     verifyRazorpay,
 } from "../controller/userContoller.js";
@@ -17,6 +19,9 @@ import { upload } from "../util/cloudinary.js";
 import { docAuth } from "../middleware/doctorAuth.js";
 
 const userRouter = express.Router();
+
+userRouter.put('/emergency-contact', auth, addEmergencyContact);
+userRouter.post("/sos-alert", auth, sos);
 
 userRouter.get("/", allUsers); // done
 userRouter.get("/profile", auth, getProfile); // done
@@ -29,6 +34,8 @@ userRouter.post("/logout", logoutUser); // done
 userRouter.post("/payment",auth, razorpayPayment); // done
 userRouter.post("/verify", auth, verifyRazorpay); // done
 userRouter.put("/:appointmentId", auth, updateAppointmentTimings)
+
+
 
 
 export default userRouter;

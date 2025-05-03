@@ -24,7 +24,7 @@ console.log(localStorage.getItem("token"));
 
     } catch (error) {
       console.log(error.message);
-      
+      toast.error("Invalid email or password");
     }
   }
 
