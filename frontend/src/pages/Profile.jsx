@@ -159,7 +159,7 @@ const Profile = () => {
   return (
     <>
       <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-2xl">
+        <div className="bg-white shadow-lg my-6 rounded-lg p-8 w-full max-w-2xl">
           {/* Profile Image Section */}
           <div className="flex flex-col items-center mb-6">
             <div
