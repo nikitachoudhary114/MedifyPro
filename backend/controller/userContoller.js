@@ -2,9 +2,10 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import userModel from "../model/userModel.js";
-import razorpay from 'razorpay'
+import razorpay from "razorpay";
 import appointmentModel from "../model/appointmentModel.js";
 import doctorModel from "../model/doctorModel.js";
+import twilio from 'twilio';
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -105,7 +106,7 @@ const getProfile = async (req, res) => {
         dob: user.dob,
         gender: user.gender,
         image: user.image,
-        emergencyContacts: user.emergencyContacts || []
+        emergencyContacts: user.emergencyContacts || [],
       },
     });
   } catch (error) {
@@ -114,32 +115,25 @@ const getProfile = async (req, res) => {
   }
 };
 
-
-
 const editProfile = async (req, res) => {
   const { name, phone, address, dob, gender } = req.body;
 
   try {
-    // Create an object with updated data
     const updateData = {
       name,
       phone,
       address,
-      dob: dob ? new Date(dob) : null, // Convert dob to Date if provided
+      dob: dob ? new Date(dob) : null,
       gender,
     };
 
-    // If a new image is uploaded, add it to the updateData
     if (req.file) {
-      updateData.image = req.file.path; // Save only the Cloudinary URL
+      updateData.image = req.file.path;
     }
 
-    // Update user data (excluding email and password)
-    const user = await userModel.findByIdAndUpdate(
-      req.user.id, // Assuming `req.user.id` contains the authenticated user's ID
-      updateData,
-      { new: true } // Return the updated document
-    );
+    const user = await userModel.findByIdAndUpdate(req.user.id, updateData, {
+      new: true,
+    });
 
     if (!user) {
       return res
@@ -147,17 +141,16 @@ const editProfile = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Respond with updated user data
     res.status(200).json({
       success: true,
       user: {
         name: user.name,
-        email: user.email, // Email remains unchanged
+        email: user.email,
         phone: user.phone,
         address: user.address,
         dob: user.dob,
         gender: user.gender,
-        image: user.image, // Include updated image URL
+        image: user.image,
       },
     });
   } catch (error) {
@@ -167,7 +160,6 @@ const editProfile = async (req, res) => {
       .json({ success: false, message: "Failed to update profile" });
   }
 };
-
 
 const allUsers = async (req, res) => {
   try {
@@ -213,10 +205,7 @@ const deleteUser = async (req, res) => {
 const razorpayInstance = new razorpay({
   key_id: "rzp_test_VuXL9xKSfucJ3D",
   key_secret: "NscUSHpcPjO78zXJTQ98isuI",
-
-}
-)
-
+});
 
 const razorpayPayment = async (req, res) => {
   try {
@@ -230,11 +219,14 @@ const razorpayPayment = async (req, res) => {
     if (!appointmentData || appointmentData.status === "Cancelled") {
       return res
         .status(404)
-        .json({ success: false, message: "Appointment cancelled or not found" });
+        .json({
+          success: false,
+          message: "Appointment cancelled or not found",
+        });
     }
 
     const options = {
-      amount: appointmentData.doctorId.fees * 100, // Convert fees to paise
+      amount: appointmentData.doctorId.fees * 100, 
       currency: process.env.CURRENCY || "INR",
       receipt: appointmentId.toString(),
     };
@@ -255,7 +247,9 @@ const updateAppointmentTimings = async (req, res) => {
 
     const appointment = await appointmentModel.findById(appointmentId);
     if (!appointment) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
     if (date) {
       appointment.date = date;
@@ -266,45 +260,50 @@ const updateAppointmentTimings = async (req, res) => {
     }
     appointment.save();
 
-    res.status(200).json({ success: true, message: "Appointment timings updated successfully", appointment });
-
-
-    
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Appointment timings updated successfully",
+        appointment,
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "server error" });
   }
-}
+};
 
 const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id } = req.body;
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
 
     // console.log(orderInfo)
 
-
-    if (orderInfo.status === 'paid') {
-      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true,  paymentMode:"Online", status: "Confirmed" });
-      res.json({ success: true, message: "payment successful" })
+    if (orderInfo.status === "paid") {
+      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {
+        payment: true,
+        paymentMode: "Online",
+        status: "Confirmed",
+      });
+      res.json({ success: true, message: "payment successful" });
     } else {
-      res.json({success:false, message:"payment fail"})
+      res.json({ success: false, message: "payment fail" });
     }
-
-
-
   } catch (error) {
     console.error("Error in Razorpay payment:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
-}
+};
 
 const addEmergencyContact = async (req, res) => {
   const userId = req.user.id;
   const { name, phone } = req.body;
 
   if (!name || !phone) {
-    return res.status(400).json({ message: "Name and phone number are both required" });
+    return res
+      .status(400)
+      .json({ message: "Name and phone number are both required" });
   }
 
   try {
@@ -312,22 +311,23 @@ const addEmergencyContact = async (req, res) => {
       userId,
       {
         $push: {
-          emergencyContacts: { name, phone }
-        }
+          emergencyContacts: { name, phone },
+        },
       },
       { new: true }
     );
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     res.status(200).json({
       success: true,
       message: "Emergency contact added successfully!",
-      emergencyContacts: user.emergencyContacts
+      emergencyContacts: user.emergencyContacts,
     });
-
   } catch (error) {
     console.error("Error adding emergency contact:", error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -335,14 +335,50 @@ const addEmergencyContact = async (req, res) => {
 };
 
 
-const sos = async (req, res) => {
+
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+
+ const sos = async (req, res) => {
   try {
-    
+    const userId = req.user.id;
+
+    const user = await userModel.findById(userId);
+
+    if (!user || !user.emergencyContacts || user.emergencyContacts.length === 0) {
+      return res.status(400).json({ success: false, message: "No emergency contacts found." });
+    }
+
+    const message = req.body.message || "🚨 SOS ALERT! I need help immediately. Please check on me.";
+
+    const results = await Promise.allSettled(
+      user.emergencyContacts.map(contact =>
+        client.messages.create({
+          body: `${user.name || 'Someone'} triggered an SOS! Message: ${message}`,
+          from: process.env.TWILIO_PHONE,
+          to: contact.phone,
+        })
+      )
+    );
+
+    const failed = results.filter(r => r.status === 'rejected');
+
+    if (failed.length > 0) {
+      console.error("Some messages failed:", failed);
+      return res.status(207).json({
+        success: false,
+        message: "SOS sent to some contacts, but failed for others.",
+        failedCount: failed.length,
+      });
+    }
+
+    res.status(200).json({ success: true, message: "SOS messages sent to all contacts." });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).json({success:false, message: "server error"})
+    console.error("SOS error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
-}
+};
 
 export {
   loginUser,
@@ -357,5 +393,5 @@ export {
   verifyRazorpay,
   updateAppointmentTimings,
   sos,
-  addEmergencyContact
+  addEmergencyContact,
 };

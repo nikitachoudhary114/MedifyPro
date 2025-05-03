@@ -76,6 +76,41 @@ const Navbar = () => {
     );
   }
 
+const handleSOSClick = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    toast.error("Login first to trigger SOS!");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:8080/api/user/sos-alert", // your backend route
+      {
+        message: "🚨 SOS ALERT! I need help immediately. Please check on me.",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.data.success) {
+      toast.success("🚨 SOS triggered! Help is on the way.");
+    } else {
+      toast.error(`Failed to send SOS: ${res.data.message}`);
+    }
+  } catch (error) {
+    console.error("Error triggering SOS:", error);
+    toast.error("Something went wrong while sending SOS.");
+  }
+};
+
+
+
+
   return (
     <>
       <div className="flex justify-between text-sm items-center border-b border-b-gray-400 gap-2">
@@ -132,6 +167,14 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
+        <button
+          onClick={handleSOSClick}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 hover:bg-red-700 transition duration-300"
+        >
+          <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
+          <span className="relative z-10 text-lg font-bold">SOS</span>
+        </button>
+
         <div className="flex gap-3 items-center">
           <div>
             {!token ? (

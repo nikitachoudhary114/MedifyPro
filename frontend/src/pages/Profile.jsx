@@ -38,7 +38,7 @@ const Profile = () => {
 
   const submitEmergencyContacts = () => {
     // Handle form submission (e.g., validation, API call)
-    console.log(emergencyContacts);
+    // console.log(emergencyContacts);
     setShowPopup(false);
   };
 
@@ -65,7 +65,7 @@ const Profile = () => {
           setDob(user.dob ? user.dob.split("T")[0] : "");
           setImage(user.image || null);
           setEmergencyContacts(user.emergencyContacts || []);
-          console.log(user);
+          // console.log(user);
         } else {
           toast.error("Failed to load profile data");
         }
