@@ -43,7 +43,7 @@ const DisplayNearByPharmacy = () => {
     return (
       <div className="p-4 mt-14">
         <h2 className="text-xl font-semibold mb-4">Nearby Locations</h2>
-        <LoadScript googleMapsApiKey="AIzaSyCLWWI7mYcK_p7QYlAj8pdB_NGfJHQEH7o">
+        <LoadScript googleMapsApiKey="">
           <GoogleMap
             mapContainerStyle={{ height: "400px", width: "100%" }}
             center={mapLocation}
