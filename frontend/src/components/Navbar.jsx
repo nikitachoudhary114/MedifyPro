@@ -84,29 +84,48 @@ const handleSOSClick = async () => {
     return;
   }
 
-  try {
-    const res = await axios.post(
-      "http://localhost:8080/api/user/sos-alert", // your backend route
-      {
-        message: "🚨 SOS ALERT! I need help immediately. Please check on me.",
+  // Get user's location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const res = await axios.post(
+            "http://localhost:8080/api/user/sos-alert", // your backend route
+            {
+              message:
+                "🚨 SOS ALERT! I need help immediately. Please check on me.",
+              latitude,
+              longitude,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (res.data.success) {
+            toast.success("🚨 SOS triggered! Help is on the way.");
+          } else {
+            toast.error(`Failed to send SOS: ${res.data.message}`);
+          }
+        } catch (error) {
+          console.error("Error triggering SOS:", error);
+          toast.error("Something went wrong while sending SOS.");
+        }
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      (error) => {
+        console.error("Error getting location:", error);
+        toast.error("Failed to get your location.");
       }
     );
-
-    if (res.data.success) {
-      toast.success("🚨 SOS triggered! Help is on the way.");
-    } else {
-      toast.error(`Failed to send SOS: ${res.data.message}`);
-    }
-  } catch (error) {
-    console.error("Error triggering SOS:", error);
-    toast.error("Something went wrong while sending SOS.");
+  } else {
+    toast.error("Geolocation is not supported by this browser.");
   }
 };
+
 
 
 
