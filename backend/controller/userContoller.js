@@ -5,7 +5,7 @@ import userModel from "../model/userModel.js";
 import razorpay from "razorpay";
 import appointmentModel from "../model/appointmentModel.js";
 import doctorModel from "../model/doctorModel.js";
-import twilio from 'twilio';
+import twilio from "twilio";
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -217,16 +217,14 @@ const razorpayPayment = async (req, res) => {
       .populate("doctorId", "fees");
 
     if (!appointmentData || appointmentData.status === "Cancelled") {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Appointment cancelled or not found",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Appointment cancelled or not found",
+      });
     }
 
     const options = {
-      amount: appointmentData.doctorId.fees * 100, 
+      amount: appointmentData.doctorId.fees * 100,
       currency: process.env.CURRENCY || "INR",
       receipt: appointmentId.toString(),
     };
@@ -260,13 +258,11 @@ const updateAppointmentTimings = async (req, res) => {
     }
     appointment.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Appointment timings updated successfully",
-        appointment,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Appointment timings updated successfully",
+      appointment,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "server error" });
@@ -334,34 +330,44 @@ const addEmergencyContact = async (req, res) => {
   }
 };
 
-
-
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-
- const sos = async (req, res) => {
+const sos = async (req, res) => {
   try {
+    const id = process.env.TWILIO_ACCOUNT_SID;
+    const auth_token = process.env.TWILIO_AUTH_TOKEN;
+
+    const client = new twilio(id, auth_token);
+
     const userId = req.user.id;
 
     const user = await userModel.findById(userId);
 
-    if (!user || !user.emergencyContacts || user.emergencyContacts.length === 0) {
-      return res.status(400).json({ success: false, message: "No emergency contacts found." });
+    if (
+      !user ||
+      !user.emergencyContacts ||
+      user.emergencyContacts.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No emergency contacts found." });
     }
 
-    const message = req.body.message || "🚨 SOS ALERT! I need help immediately. Please check on me.";
+    const message =
+      req.body.message ||
+      "🚨 SOS ALERT! I need help immediately. Please check on me.";
 
     const results = await Promise.allSettled(
-      user.emergencyContacts.map(contact =>
+      user.emergencyContacts.map((contact) =>
         client.messages.create({
-          body: `${user.name || 'Someone'} triggered an SOS! Message: ${message}`,
+          body: `${
+            user.name || "Someone"
+          } triggered an SOS! Message: ${message}`,
           from: process.env.TWILIO_PHONE,
           to: contact.phone,
         })
       )
     );
 
-    const failed = results.filter(r => r.status === 'rejected');
+    const failed = results.filter((r) => r.status === "rejected");
 
     if (failed.length > 0) {
       console.error("Some messages failed:", failed);
@@ -372,8 +378,9 @@ const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
       });
     }
 
-    res.status(200).json({ success: true, message: "SOS messages sent to all contacts." });
-
+    res
+      .status(200)
+      .json({ success: true, message: "SOS messages sent to all contacts." });
   } catch (error) {
     console.error("SOS error:", error);
     res.status(500).json({ success: false, message: "Server error" });
