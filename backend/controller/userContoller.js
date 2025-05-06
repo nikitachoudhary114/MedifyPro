@@ -330,62 +330,6 @@ const addEmergencyContact = async (req, res) => {
   }
 };
 
-// const sos = async (req, res) => {
-//   try {
-//     const id = process.env.TWILIO_ACCOUNT_SID;
-//     const auth_token = process.env.TWILIO_AUTH_TOKEN;
-
-//     const client = new twilio(id, auth_token);
-
-//     const userId = req.user.id;
-
-//     const user = await userModel.findById(userId);
-
-//     if (
-//       !user ||
-//       !user.emergencyContacts ||
-//       user.emergencyContacts.length === 0
-//     ) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "No emergency contacts found." });
-//     }
-
-//     const message =
-//       req.body.message ||
-//       "🚨 SOS ALERT! I need help immediately. Please check on me.";
-
-//     const results = await Promise.allSettled(
-//       user.emergencyContacts.map((contact) =>
-//         client.messages.create({
-//           body: `${
-//             user.name || "Someone"
-//           } triggered an SOS! Message: ${message}`,
-//           from: process.env.TWILIO_PHONE,
-//           to: contact.phone,
-//         })
-//       )
-//     );
-
-//     const failed = results.filter((r) => r.status === "rejected");
-
-//     if (failed.length > 0) {
-//       console.error("Some messages failed:", failed);
-//       return res.status(207).json({
-//         success: false,
-//         message: "SOS sent to some contacts, but failed for others.",
-//         failedCount: failed.length,
-//       });
-//     }
-
-//     res
-//       .status(200)
-//       .json({ success: true, message: "SOS messages sent to all contacts." });
-//   } catch (error) {
-//     console.error("SOS error:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
 
 
 
@@ -400,20 +344,12 @@ const sos = async (req, res) => {
 
     const user = await userModel.findById(userId);
 
-    if (
-      !user ||
-      !user.emergencyContacts ||
-      user.emergencyContacts.length === 0
-    ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No emergency contacts found." });
+    if (!user || !user.emergencyContacts || user.emergencyContacts.length === 0) {
+      return res.status(400).json({ success: false, message: "No emergency contacts found." });
     }
 
     // Retrieve message and location from the request body
-    const message =
-      req.body.message ||
-      "🚨 SOS ALERT! I need help immediately. Please check on me.";
+    const message = req.body.message || "🚨 SOS ALERT! I need help immediately. Please check on me.";
     const { latitude, longitude } = req.body;
 
     // Create a Google Maps link with the user's location
@@ -422,17 +358,20 @@ const sos = async (req, res) => {
     // Form the message with location and Google Maps link
     const locationMessage = `🚨 SOS! I need help. I'm at ${mapLink}`;
 
+    console.log(locationMessage)
+
+    // Send SOS message to all emergency contacts
     const results = await Promise.allSettled(
       user.emergencyContacts.map((contact) =>
         client.messages.create({
-          body: `${user.name || "Someone"
-            } triggered an SOS! Message: ${locationMessage}`,
+          body: `${user.name || "Someone"} triggered an SOS! Message: ${locationMessage}`,
           from: process.env.TWILIO_PHONE,
           to: contact.phone,
         })
       )
     );
 
+    // Filter out any failed messages
     const failed = results.filter((r) => r.status === "rejected");
 
     if (failed.length > 0) {
@@ -444,14 +383,14 @@ const sos = async (req, res) => {
       });
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "SOS messages sent to all contacts." });
+    res.status(200).json({ success: true, message: "SOS messages sent to all contacts." });
   } catch (error) {
     console.error("SOS error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
 
 
 export {

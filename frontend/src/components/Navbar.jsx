@@ -11,6 +11,7 @@ const Navbar = () => {
   const [dropdown, setDropdown] = useState(false);
   const [image, setImage] = useState(null);
   const navigate = useNavigate();
+  const [sosTriggered, setSosTriggered] = useState(false);
 
   function dropdownToggle() {
     setDropdown(!dropdown);
@@ -76,15 +77,70 @@ const Navbar = () => {
     );
   }
 
-const handleSOSClick = async () => {
-  const token = localStorage.getItem("token");
+// const handleSOSClick = async () => {
+//   const token = localStorage.getItem("token");
 
+//   if (!token) {
+//     toast.error("Login first to trigger SOS!");
+//     return;
+//   }
+
+//   // Get user's location
+//   if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(
+//       async (position) => {
+//         const { latitude, longitude } = position.coords;
+
+//         try {
+//           const res = await axios.post(
+//             "http://localhost:8080/api/user/sos-alert", // your backend route
+//             {
+//               message:
+//                 "🚨 SOS ALERT! I need help immediately. Please check on me.",
+//               latitude,
+//               longitude,
+//             },
+//             {
+//               headers: {
+//                 Authorization: `Bearer ${token}`,
+//               },
+//             }
+//           );
+
+//           if (res.data.success) {
+//             toast.success("🚨 SOS triggered! Help is on the way.");
+//           } else {
+//             toast.error(`Failed to send SOS: ${res.data.message}`);
+//           }
+//         } catch (error) {
+//           console.error("Error triggering SOS:", error);
+//           toast.error("Something went wrong while sending SOS.");
+//         }
+//       },
+//       (error) => {
+//         console.error("Error getting location:", error);
+//         toast.error("Failed to get your location.");
+//       }
+//     );
+//   } else {
+//     toast.error("Geolocation is not supported by this browser.");
+//   }
+// };
+
+
+
+
+const handleSOSClick = async () => {
+  if (sosTriggered) return; // prevent repeat clicks
+
+  const token = localStorage.getItem("token");
   if (!token) {
     toast.error("Login first to trigger SOS!");
     return;
   }
 
-  // Get user's location
+  setSosTriggered(true); // block further attempts
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -92,40 +148,38 @@ const handleSOSClick = async () => {
 
         try {
           const res = await axios.post(
-            "http://localhost:8080/api/user/sos-alert", // your backend route
+            "http://localhost:8080/api/user/sos-alert",
             {
-              message:
-                "🚨 SOS ALERT! I need help immediately. Please check on me.",
+              message: "🚨 SOS! I need help.",
               latitude,
               longitude,
             },
             {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
 
           if (res.data.success) {
-            toast.success("🚨 SOS triggered! Help is on the way.");
+            toast.success("🚨 SOS triggered!");
           } else {
-            toast.error(`Failed to send SOS: ${res.data.message}`);
+            toast.error(`Failed: ${res.data.message}`);
+            setSosTriggered(false); // allow retry if failure
           }
         } catch (error) {
-          console.error("Error triggering SOS:", error);
-          toast.error("Something went wrong while sending SOS.");
+          toast.error("Something went wrong.");
+          setSosTriggered(false);
         }
       },
-      (error) => {
-        console.error("Error getting location:", error);
-        toast.error("Failed to get your location.");
+      () => {
+        toast.error("Failed to get location.");
+        setSosTriggered(false);
       }
     );
   } else {
-    toast.error("Geolocation is not supported by this browser.");
+    toast.error("Geolocation not supported.");
+    setSosTriggered(false);
   }
 };
-
 
 
 
@@ -186,8 +240,11 @@ const handleSOSClick = async () => {
             </li>
           </ul>
         </div>
+        
+
         <button
           onClick={handleSOSClick}
+          disabled={sosTriggered}
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 hover:bg-red-700 transition duration-300"
         >
           <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
