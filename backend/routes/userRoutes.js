@@ -17,8 +17,12 @@ import {
 import { auth } from "../middleware/auth.js";
 import { upload } from "../util/cloudinary.js";
 import { docAuth } from "../middleware/doctorAuth.js";
+import { getNearbyPlaces } from '../controller/mapsController.js'
 
 const userRouter = express.Router();
+
+
+userRouter.get("/nearby-places", getNearbyPlaces)
 
 userRouter.put('/emergency-contact', auth, addEmergencyContact);
 userRouter.post("/sos-alert", auth, sos);
@@ -34,6 +38,7 @@ userRouter.post("/logout", logoutUser); // done
 userRouter.post("/payment",auth, razorpayPayment); // done
 userRouter.post("/verify", auth, verifyRazorpay); // done
 userRouter.put("/:appointmentId", auth, updateAppointmentTimings)
+
 
 
 

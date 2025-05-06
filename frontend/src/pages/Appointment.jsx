@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import DisplayNearByPharmacy from "../components/DisplayNearByPharmacy";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -15,12 +17,18 @@ const Appointment = () => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
+ 
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+  
+
     fetchAppointments();
   }, []);
+
+ 
 
   // Fetch all appointments
   const fetchAppointments = async () => {
@@ -318,6 +326,10 @@ const Appointment = () => {
           </div>
         </Modal>
       )}
+
+      <DisplayNearByPharmacy/>
+      
+
     </div>
   );
 };
