@@ -9,6 +9,10 @@ import appointmentRoutes from './routes/appointmentRoutes.js';
 import {  searchAndFilter } from './controller/doctorController.js';
 import adminRoutes from "./routes/adminRoutes.js";
 import './util/cronScheduler.js'
+import http from 'http';
+import { Server } from 'socket.io';
+import chatModel from './model/chatModel.js'
+import { timeStamp } from 'console';
 
 dotenv.config();
 
@@ -30,9 +34,39 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 app.post('/api/search-filter', searchAndFilter);
 
+const server = http.createServer(app);
 
-
-
-app.listen(port, () => {
-    console.log(`Server listening to port ${port}`);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ['GET', 'POST']
+    }
 });
+
+
+io.on('connection', (socket) => {
+    console.log("User connected:", socket.id);
+
+    socket.on('joinRoom',async ({ room }) => {
+        socket.join(room);
+        const messages = await chatModel.find({ room }).sort({ timeStamp: 1 });
+        socket.emit("previousMessages", messages);
+    });
+
+    socket.on('sendMessage', async ({ room, message, sender, senderName }) => {
+        const chatMsg = new chatModel({ room, message, sender, senderName });
+        await chatMsg.save();
+        io.to(room).emit('recievedMessage', { message, sender, senderName, timestamp: chatMsg.timestamp });
+    });
+
+    socket.on('disconnect', () => {
+        console.log("user Disconnected", socket.id);
+    });
+});
+
+server.listen(8080);
+
+
+// app.listen(port, () => {
+//     console.log(`Server listening to port ${port}`);
+// });

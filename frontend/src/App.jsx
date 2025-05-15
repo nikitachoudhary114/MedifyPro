@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Appointment from "./pages/Appointment";
 import Profile from "./pages/Profile";
 import SignUp from "./pages/SignUp";
+import ChatWindow from "./pages/ChatWindow";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -34,7 +35,7 @@ function App() {
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/appointment" element={<Appointment/> } />
             <Route path="/profile" element={<Profile/> } />
-           
+           <Route path="/chat" element={<ChatWindow/>}/>
           </Routes>
         </div>
 

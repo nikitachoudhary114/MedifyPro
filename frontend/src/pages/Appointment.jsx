@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import DisplayNearByPharmacy from "../components/DisplayNearByPharmacy";
+import ChatWindow from "./ChatWindow";
+import { jwtDecode } from "jwt-decode";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -16,11 +18,36 @@ const Appointment = () => {
   const [newTime, setNewTime] = useState("");
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-
+// ...existing code...
+const [showChatModal, setShowChatModal] = useState(false);
+const [selectedChatRoom, setSelectedChatRoom] = useState(null);
+// ...existing code...
  
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const decodedToken = token ? jwtDecode(token) : null;
+  const doctorId = decodedToken?.id;
+
+
+// Add this function at the top of your file
+function parseJwt(token) {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    // console.log(jsonPayload)
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
   useEffect(() => {
   
@@ -28,6 +55,33 @@ const Appointment = () => {
     fetchAppointments();
   }, []);
 
+
+  const [doctorName, setDoctorName] = useState("");
+
+  useEffect(() => {
+    const fetchDoctorName = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/doctor/${app}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        // setDoctorName(response.data.doctor);
+        console.log(response.data)
+        console.log(doctorId)
+      } catch (error) {
+        // setDoctorName("Doctor");
+        console.log(error)
+      }
+    };
+
+    if (doctorId) {
+      fetchDoctorName();
+    }
+  }, [doctorId, token]);
  
 
   // Fetch all appointments
@@ -239,6 +293,17 @@ const Appointment = () => {
                     </button>
                   </>
                 )}
+
+                <button
+                  className="w-3/4 p-2 bg-green-500 hover:bg-green-600 text-white"
+                  onClick={() => {
+                    setSelectedChatRoom(appointment._id);
+                    setShowChatModal(true);
+                  }}
+                >
+                  Chat with doctor
+                </button>
+
                 <button
                   onClick={() => deleteAppointment(appointment._id)}
                   className="w-3/4 p-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
@@ -327,9 +392,16 @@ const Appointment = () => {
         </Modal>
       )}
 
-      <DisplayNearByPharmacy/>
-      
+      <DisplayNearByPharmacy />
 
+      {showChatModal && selectedChatRoom && (
+        <ChatWindow
+          room={selectedChatRoom}
+          userId={doctorId}
+          userName={doctorName}
+          onClose={() => setShowChatModal(false)}
+        />
+      )}
     </div>
   );
 };

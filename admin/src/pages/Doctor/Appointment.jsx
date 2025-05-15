@@ -3,19 +3,27 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { assets } from "../../assets/assets";
-
+import ChatWindow from "./ChatWindow";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const[patId, setPatId] = useState();
 
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChatRoom, setSelectedChatRoom] = useState(null);
+const [patientName, setPatientName] = useState("")
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
   const doctorId = decodedToken?.id;
 
- 
+
+  const [doctorName, setDoctorName] = useState("");
+
+
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -29,6 +37,9 @@ const Appointment = () => {
         );
         setAppointments(response.data.doctorAppointments);
         setLoading(false);
+// setPatId(appointments.patientId)
+        console.log(patientName);
+        // console.log(patId)
       } catch (error) {
         console.error("Error fetching appointments:", error);
         toast.error("Failed to fetch appointments");
@@ -41,7 +52,50 @@ const Appointment = () => {
     }
   }, [doctorId, token]);
 
+
+  // useEffect(() => {
+  //   const fetchPatientName = async () => {
+  //     const response = await axios.get(
+  //       `http://localhost:8080/api/user/${patientId}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     setPatientName(response.data.user.name);
+  //     console.log(patientName)
+  //   }
+
+  //   if (patientId) {
+  //     fetchPatientName();
+  //   }
+  // },[patientId,  token])
+
+
+  useEffect(() => {
+      const fetchDoctorName = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/api/doctor/${doctorId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setDoctorName(response.data.doctor.name);
+        } catch (error) {
+          // setDoctorName("Doctor");
+          console.log(error)
+        }
+      };
   
+      if (doctorId) {
+        fetchDoctorName();
+      }
+    }, [doctorId, token]);
+
   const handleViewDetails = async (patientId) => {
     try {
       const response = await axios.get(
@@ -52,15 +106,17 @@ const Appointment = () => {
           },
         }
       );
-      setSelectedPatient(response.data.user); 
-      setIsModalOpen(true); 
+      setSelectedPatient(response.data.user);
+      
+      setIsModalOpen(true);
+
+      // console.log(selectedPatient)
     } catch (error) {
       console.error("Error fetching patient details:", error);
       toast.error("Failed to fetch patient details");
     }
   };
 
-  
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedPatient(null);
@@ -114,6 +170,9 @@ const Appointment = () => {
                 <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
                   View
                 </th>
+                <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
+                  Chat
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -153,7 +212,6 @@ const Appointment = () => {
                     </span>
                   </td>
                   <td className="border border-gray-300 px-6 py-3 text-center">
-                    
                     <img
                       src={assets.view}
                       className="w-7"
@@ -162,6 +220,21 @@ const Appointment = () => {
                         handleViewDetails(appointment.patientId?._id)
                       }
                     />
+                  </td>
+                  <td className="border border-gray-300 px-6 py-3 text-center">
+                    <button
+                      className="px-3 py-1  bg-blue-400 text-white rounded-full text-sm ml-2"
+                      onClick={() => {
+                        setSelectedChatRoom(appointment._id); // room ID
+                        setPatientName(
+                          appointment.patientId?.name || "Patient"
+                        );
+                        setPatId(appointment.patientId);
+                        setShowChatModal(true);
+                      }}
+                    >
+                      Chat
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -214,6 +287,15 @@ const Appointment = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {showChatModal && (
+        <ChatWindow
+          room={selectedChatRoom}
+          userId={doctorId}
+          userName={doctorName}
+          onClose={() => setShowChatModal(false)}
+        />
       )}
     </div>
   );
