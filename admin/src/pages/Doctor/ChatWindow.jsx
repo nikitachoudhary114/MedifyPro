@@ -38,7 +38,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
         sender: userId,
         senderName: userName,
       });
-      console.log(userName)
+      // console.log(userName)
       setMessage("");
     }
   };

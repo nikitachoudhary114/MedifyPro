@@ -22,7 +22,9 @@ const Appointment = () => {
 const [showChatModal, setShowChatModal] = useState(false);
 const [selectedChatRoom, setSelectedChatRoom] = useState(null);
 // ...existing code...
- 
+
+  const [patId, setPatId] = useState();
+  const [patientName, setPatientName] = useState("")
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -56,13 +58,44 @@ function parseJwt(token) {
   }, []);
 
 
+
+    useEffect(() => {
+      const fetchProfileData = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:8080/api/user/profile",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+  
+          if (response.data.success) {
+            const user = response.data.user;
+            setPatId(user.id);
+            setPatientName(user.name || "Patient");
+          } else {
+            toast.error("Failed to load profile data");
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+          toast.error("An error occurred while fetching the profile data");
+        }
+      };
+  
+      fetchProfileData();
+    }, []);
+
+
   const [doctorName, setDoctorName] = useState("");
 
   useEffect(() => {
     const fetchDoctorName = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/doctor/${app}`,
+          `http://localhost:8080/api/doctor/${doctorId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -397,8 +430,8 @@ function parseJwt(token) {
       {showChatModal && selectedChatRoom && (
         <ChatWindow
           room={selectedChatRoom}
-          userId={doctorId}
-          userName={doctorName}
+          userId={patId}
+          userName={patientName}
           onClose={() => setShowChatModal(false)}
         />
       )}
