@@ -9,6 +9,18 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
+
+  useEffect(() => {
+    socket.on("typing", (name) => {
+      setTypingUser(name);
+      setIsTyping(true);
+      setTimeout(() => setIsTyping(false), 2000);
+    });
+  }, []);
+  
+
   useEffect(() => {
     socket.emit("joinRoom", { room });
 
@@ -17,13 +29,13 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
       setLoading(false);
     });
 
-    socket.on("receiveMessage", (data) => {
+    socket.on("recievedMessage", (data) => {
       setChat((prev) => [...prev, data]);
     });
 
     return () => {
       socket.off("previousMessages");
-      socket.off("receiveMessage");
+      socket.off("recievedMessage");
     };
   }, [room]);
 
@@ -87,9 +99,23 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
                   {msg.sender === userId ? "You" : msg.senderName || msg.sender}
                 </div>
                 <div className="text-sm">{msg.message}</div>
+                <div className="text-xs text-gray-500 text-right mt-1">
+                  {new Date(msg.timestamp || Date.now()).toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}
+                </div>
               </div>
             </div>
           ))
+        )}
+        {isTyping && typingUser !== userName && (
+          <div className="text-sm text-gray-500 italic">
+            {typingUser} is typing...
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -101,7 +127,10 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
         <input
           className="flex-1 border border-violet-300 rounded-lg p-2 focus:outline-none focus:ring focus:ring-violet-300"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            socket.emit("typing", { room, senderName: userName });
+          }}
           placeholder="Type your message..."
         />
         <button

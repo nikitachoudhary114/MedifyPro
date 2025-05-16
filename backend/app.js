@@ -59,6 +59,11 @@ io.on('connection', (socket) => {
         io.to(room).emit('recievedMessage', { message, sender, senderName, timestamp: chatMsg.timestamp });
     });
 
+    socket.on("typing", ({ room, senderName }) => {
+        socket.to(room).emit("typing", senderName);
+    });
+      
+
     socket.on('disconnect', () => {
         console.log("user Disconnected", socket.id);
     });
