@@ -296,7 +296,7 @@ function parseJwt(token) {
               </div>
 
               {/* Action Buttons */}
-              <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
+              {/* <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
                 {appointment.payment ? (
                   <button
                     className="w-3/4 p-2 bg-slate-200 text-gray-700"
@@ -340,6 +340,55 @@ function parseJwt(token) {
                 <button
                   onClick={() => deleteAppointment(appointment._id)}
                   className="w-3/4 p-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                >
+                  Cancel Appointment
+                </button>
+              </div> */}
+
+              <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
+                {appointment.payment ? (
+                  <button
+                    className="w-3/4 p-2 bg-violet-100 text-violet-700 hover:bg-violet-200 border border-violet-300 rounded-lg transition-all"
+                    onClick={() => {
+                      setSelectedDoctorId(appointment.doctorId._id);
+                      setShowReviewModal(true);
+                    }}
+                  >
+                    Add Review
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="w-3/4 p-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg transition-all"
+                      onClick={() => appointmentRazorpay(appointment._id)}
+                    >
+                      Pay here
+                    </button>
+                    <button
+                      className="w-3/4 p-2 bg-violet-400 hover:bg-violet-500 text-white rounded-lg transition-all"
+                      onClick={() => {
+                        setSelectedAppointmentId(appointment._id);
+                        setShowUpdateModal(true);
+                      }}
+                    >
+                      Update date and time
+                    </button>
+                  </>
+                )}
+
+                <button
+                  className="w-3/4 p-2 bg-violet-300 hover:bg-violet-400 text-white rounded-lg transition-all"
+                  onClick={() => {
+                    setSelectedChatRoom(appointment._id);
+                    setShowChatModal(true);
+                  }}
+                >
+                  Chat with doctor
+                </button>
+
+                <button
+                  onClick={() => deleteAppointment(appointment._id)}
+                  className="w-3/4 p-2 border border-red-400 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all"
                 >
                   Cancel Appointment
                 </button>
