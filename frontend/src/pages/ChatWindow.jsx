@@ -89,10 +89,10 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
               }`}
             >
               <div
-                className={`p-3 rounded-lg max-w-xs shadow ${
+                className={`px-5 py-3 rounded-lg max-w-xs shadow ${
                   msg.sender === userId
                     ? "bg-violet-200 text-black"
-                    : "bg-white border "
+                    : "bg-white  "
                 }`}
               >
                 <div className="text-xs text-gray-600 mb-1 font-medium">
