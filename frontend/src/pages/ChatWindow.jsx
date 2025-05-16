@@ -99,14 +99,14 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
         className="p-4 flex gap-2 bg-white border-t border-gray-200"
       >
         <input
-          className="flex-1 border border-blue-300 rounded-lg p-2 focus:outline-none focus:ring focus:ring-blue-300"
+          className="flex-1 border border-violet-300 rounded-lg p-2 focus:outline-none focus:ring focus:ring-violet-300"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
         />
         <button
           type="submit"
-          className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg"
+          className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-lg"
         >
           Send
         </button>
