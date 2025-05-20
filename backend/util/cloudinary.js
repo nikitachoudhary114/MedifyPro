@@ -23,11 +23,12 @@ cloudinary.config({
 // Configure Cloudinary storage for Multer
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: "medifyPro", // Folder name in Cloudinary
-        allowed_formats: ["jpg", "jpeg", "png"], // Allowed file formats
-        public_id: (req, file) => `doctor_${Date.now()}`
+    pparams: {
+        folder: "medifyPro",
+        allowed_formats: ["jpg", "jpeg", "png", "pdf", "docx"],
+        public_id: (req, file) => `chat_${Date.now()}`
     }
+    
 });
 
 const upload = multer({ storage });

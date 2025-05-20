@@ -74,8 +74,10 @@ function parseJwt(token) {
   
           if (response.data.success) {
             const user = response.data.user;
+            console.log(response.data)
             setPatId(user.id);
             setPatientName(user.name || "Patient");
+            console.log("appointment userId:", patId, "userName:", patientName);
           } else {
             toast.error("Failed to load profile data");
           }
@@ -102,19 +104,20 @@ function parseJwt(token) {
             },
           }
         );
+        
         // setDoctorName(response.data.doctor);
-        console.log(response.data)
-        console.log(doctorId)
+        // console.log(response.data)
+        // console.log(doctorId)
       } catch (error) {
         // setDoctorName("Doctor");
         console.log(error)
       }
     };
 
-    if (doctorId) {
+    
       fetchDoctorName();
-    }
-  }, [doctorId, token]);
+    
+  }, []);
  
 
   // Fetch all appointments
@@ -296,54 +299,7 @@ function parseJwt(token) {
               </div>
 
               {/* Action Buttons */}
-              {/* <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
-                {appointment.payment ? (
-                  <button
-                    className="w-3/4 p-2 bg-slate-200 text-gray-700"
-                    onClick={() => {
-                      setSelectedDoctorId(appointment.doctorId._id);
-                      setShowReviewModal(true);
-                    }}
-                  >
-                    Add Review
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      className="w-3/4 p-2 bg-custom-bg hover:bg-violet-600 text-white"
-                      onClick={() => appointmentRazorpay(appointment._id)}
-                    >
-                      Pay here
-                    </button>
-                    <button
-                      className="w-3/4 p-2 bg-blue-500 hover:bg-blue-600 text-white"
-                      onClick={() => {
-                        setSelectedAppointmentId(appointment._id);
-                        setShowUpdateModal(true);
-                      }}
-                    >
-                      Update date and time
-                    </button>
-                  </>
-                )}
-
-                <button
-                  className="w-3/4 p-2 bg-green-500 hover:bg-green-600 text-white"
-                  onClick={() => {
-                    setSelectedChatRoom(appointment._id);
-                    setShowChatModal(true);
-                  }}
-                >
-                  Chat with doctor
-                </button>
-
-                <button
-                  onClick={() => deleteAppointment(appointment._id)}
-                  className="w-3/4 p-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                >
-                  Cancel Appointment
-                </button>
-              </div> */}
+              
 
               <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
                 {appointment.payment ? (

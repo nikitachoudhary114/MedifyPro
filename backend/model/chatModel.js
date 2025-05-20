@@ -1,11 +1,23 @@
 import mongoose from "mongoose";
+
 const chatMessageSchema = new mongoose.Schema({
-    room: { type: String }, // e.g., appointmentId
-    sender: { type: String }, // userId or doctorId
-    message: { type: String },
-    senderName: { type: String},
-    timestamp: { type: Date, default: Date.now }
+    room: String,
+    message: String,
+    sender: String,
+    senderName: String,
+    timestamp: {
+        type: Date,
+        default: Date.now,
+    },
+    file: {
+        url: String,
+        public_id: String,
+        format: String,
+        resource_type: String,
+        originalname: String,
+    },
 });
+  
 
 const chatModel = mongoose.model('ChatMessage', chatMessageSchema);
 export default  chatModel;

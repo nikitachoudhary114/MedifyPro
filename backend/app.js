@@ -14,6 +14,9 @@ import { Server } from 'socket.io';
 import chatModel from './model/chatModel.js'
 import { timeStamp } from 'console';
 
+import { upload } from './util/cloudinary.js';
+
+
 dotenv.config();
 
 const app = express();
@@ -33,6 +36,59 @@ app.use('/api/doctor', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 app.post('/api/search-filter', searchAndFilter);
+
+
+
+// const upload = multer(); // use memory storage (default)
+
+
+app.post('/api/chat/upload', upload.single('file'), async (req, res) => {
+    try {
+        const { room, sender, senderName } = req.body;
+
+        if (!req.file) return res.status(400).send("No file uploaded");
+        console.log("request=> ",req);
+        const chatMsg = new chatModel({
+            room,
+            sender,
+            senderName,
+            message: "",
+            file: {
+                url: req.file.path, // multer-storage-cloudinary sets this to secure_url
+                public_id: req.file.filename,
+                format: req.file.format,
+                resource_type: req.file.resource_type,
+                originalname: req.file.originalname,
+            },
+        });
+
+        await chatMsg.save();
+        console.log(chatMsg.file)
+
+        io.to(room).emit("recievedMessage", {
+            sender,
+            senderName,
+            message: "",
+            file: {
+                url: req.file.path,
+                originalname: req.file.originalname,
+                public_id: req.file.filename,
+                format: req.file.format,
+                resource_type: req.file.resource_type,
+            },
+            timestamp: new Date(),
+        });
+
+        res.status(200).json({ message: "File uploaded", file: chatMsg.file });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Upload failed");
+    }
+});
+  
+  
+
+
 
 const server = http.createServer(app);
 

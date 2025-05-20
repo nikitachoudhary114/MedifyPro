@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
+import axios from "axios";
+import FileUploadButton from "../../components/FileUploadButton";
 
 const socket = io("http://localhost:8080");
 
@@ -7,21 +9,16 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(true);
-  const messagesEndRef = useRef(null);
-
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
+  const messagesEndRef = useRef(null);
 
-
+  // Scroll chat to bottom when chat updates
   useEffect(() => {
-    socket.on("typing", (name) => {
-      setTypingUser(name);
-      setIsTyping(true);
-      setTimeout(() => setIsTyping(false), 2000);
-    });
-  }, []);
-  
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat]);
 
+  // Join room and setup socket listeners on mount and when room changes
   useEffect(() => {
     socket.emit("joinRoom", { room });
 
@@ -34,80 +31,104 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
       setChat((prev) => [...prev, data]);
     });
 
+    socket.on("typing", ({ senderName }) => {
+      if (senderName !== userName) {
+        setTypingUser(senderName);
+        setIsTyping(true);
+        const timeout = setTimeout(() => setIsTyping(false), 2000);
+        return () => clearTimeout(timeout);
+      }
+    });
+
     return () => {
       socket.off("previousMessages");
       socket.off("recievedMessage");
+      socket.off("typing");
     };
-  }, [room]);
+  }, [room, userName]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat]);
-
+  // Send text message handler
   const sendMessage = (e) => {
     e.preventDefault();
-    if (message.trim()) {
-      const newMsg = {
-        room,
-        message,
-        sender: userId,
-        senderName: userName,
-      };
+    if (!message.trim()) return;
 
-      socket.emit("sendMessage", newMsg);
-      setChat((prev) => [...prev, newMsg]);
-      setMessage("");
-    }
+    const newMsg = {
+      room,
+      message,
+      sender: userId,
+      senderName: userName,
+    };
+
+    socket.emit("sendMessage", newMsg);
+    setMessage("");
   };
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col md:max-w-2xl md:mx-auto md:my-10 md:rounded-2xl md:shadow-2xl overflow-hidden">
+      {/* Header */}
       <div className="bg-gradient-to-r from-violet-400 to-violet-500 text-white p-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">Chat with Patient</h2>
         <button
           onClick={onClose}
           className="text-white text-xl hover:scale-110 transition"
+          aria-label="Close chat"
         >
           ✕
         </button>
       </div>
 
+      {/* Chat messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-violet-50 space-y-2">
         {loading ? (
           <div className="text-center text-gray-500 mt-4">Loading chat...</div>
         ) : (
-          chat.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${
-                msg.sender === userId ? "justify-end" : "justify-start"
-              }`}
-            >
+          chat.map((msg, idx) => {
+            const isCurrentUser = msg.sender === userId;
+            return (
               <div
-                className={`px-5 py-3 rounded-lg max-w-xs shadow ${
-                  msg.sender === userId
-                    ? "bg-violet-200 text-black"
-                    : "bg-white  "
+                key={idx}
+                className={`flex ${
+                  isCurrentUser ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="text-xs text-gray-700 mb-1 font-medium">
-                  {msg.sender === userId ? "You" : msg.senderName || msg.sender}
-                </div>
-                <div className="text-sm">{msg.message}</div>
-                <div className="text-xs text-gray-500 text-right mt-1">
-                  {new Date(msg.timestamp || Date.now()).toLocaleTimeString(
-                    [],
-                    {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
+                <div
+                  className={`p-3 rounded-lg max-w-xs shadow ${
+                    isCurrentUser ? "bg-violet-200 text-black" : "bg-white"
+                  }`}
+                >
+                  <div className="text-xs text-gray-600 mb-1 font-medium">
+                    {isCurrentUser ? "You" : msg.senderName || msg.sender}
+                  </div>
+                  <div className="text-sm break-words">
+                    {msg.message && <div>{msg.message}</div>}
+                    {msg.file && (
+                      <div className="mt-1">
+                        {msg.file.format?.startsWith("image") ? (
+                          <img
+                            src={msg.file.url}
+                            alt={msg.file.originalname}
+                            className="max-w-xs rounded"
+                          />
+                        ) : (
+                          <a
+                            href={msg.file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-violet-700 underline"
+                          >
+                            📎 {msg.file.originalname}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
-        {isTyping && typingUser !== userName && (
+
+        {isTyping && typingUser && (
           <div className="text-sm text-gray-500 italic">
             {typingUser} is typing...
           </div>
@@ -116,11 +137,23 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input and File Upload */}
       <form
         onSubmit={sendMessage}
         className="p-4 flex gap-2 bg-white border-t border-gray-200"
       >
+        <FileUploadButton
+          room={room}
+          userId={userId}
+          userName={userName}
+          onFileUploaded={(newFileMessage) => {
+            // Ensure sender info correct here
+            setChat((prev) => [...prev, newFileMessage]);
+          }}
+        />
+
         <input
+          type="text"
           className="flex-1 border border-violet-300 rounded-lg p-2 focus:outline-none focus:ring focus:ring-violet-300"
           value={message}
           onChange={(e) => {
@@ -128,7 +161,10 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
             socket.emit("typing", { room, senderName: userName });
           }}
           placeholder="Type your message..."
+          aria-label="Type your message"
+          autoComplete="off"
         />
+
         <button
           type="submit"
           className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-lg"
