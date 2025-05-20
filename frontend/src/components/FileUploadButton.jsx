@@ -3,17 +3,17 @@ import axios from "axios";
 import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const FileUploadButton = ({ room, userId, userName, onFileUploaded }) => {
+const FileUploadButton = ({ room, userId, userName }) => {
   const fileInputRef = useRef();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
+
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // console.log("FileUploadButton userId:", userId, "userName:", userName);
-    // Set preview
     setSelectedFile(file);
     setPreviewURL(URL.createObjectURL(file));
 
@@ -24,15 +24,23 @@ const FileUploadButton = ({ room, userId, userName, onFileUploaded }) => {
     formData.append("senderName", userName);
 
     try {
-      await axios.post("http://localhost:8080/api/chat/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      // toast.success("file sended")
+      const res = await axios.post(
+        "http://localhost:8080/api/chat/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+     
+      // Clear preview after upload
+      setSelectedFile(null);
+      setPreviewURL(null);
       e.target.value = null;
     } catch (err) {
       console.error("File upload error:", err);
     }
   };
+
 
   const renderPreview = () => {
     if (!selectedFile) return null;
@@ -77,7 +85,7 @@ const FileUploadButton = ({ room, userId, userName, onFileUploaded }) => {
       {/* Hidden file input */}
       <input
         type="file"
-        accept="image/*,application/pdf"
+        accept="image/*"
         ref={fileInputRef}
         onChange={handleFileChange}
         style={{ display: "none" }}

@@ -12,6 +12,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   // Scroll chat to bottom when chat updates
   useEffect(() => {
@@ -33,11 +34,17 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
 
     socket.on("typing", ({ senderName }) => {
       if (senderName !== userName) {
-        
         setTypingUser(senderName);
         setIsTyping(true);
-        const timeout = setTimeout(() => setIsTyping(false), 2000);
-        return () => clearTimeout(timeout);
+
+        // Clear previous timeout if exists
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+          setTypingUser(null);
+        }, 2000);
       }
     });
 
@@ -45,6 +52,9 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
       socket.off("previousMessages");
       socket.off("recievedMessage");
       socket.off("typing");
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   }, [room, userName]);
 
@@ -104,21 +114,17 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
                     {msg.message && <div>{msg.message}</div>}
                     {msg.file && (
                       <div className="mt-1">
-                        {msg.file.format?.startsWith("image") ? (
-                          <img
-                            src={msg.file.url}
-                            alt={msg.file.originalname}
-                            className="max-w-xs rounded"
-                          />
-                        ) : (
-                          <a
-                            href={msg.file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-violet-700 underline"
-                          >
-                            📎 {msg.file.originalname}
-                          </a>
+                        {msg.file && (
+                          <div className="mt-1">
+                            <a
+                              href={msg.file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-violet-700 underline"
+                            >
+                              📎 {msg.file.originalname}
+                            </a>
+                          </div>
                         )}
                       </div>
                     )}
@@ -151,6 +157,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
             // Ensure sender info correct here
             setChat((prev) => [...prev, newFileMessage]);
           }}
+          
         />
 
         <input

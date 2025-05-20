@@ -2,37 +2,46 @@ import { UploadCloud } from "lucide-react";
 import axios from "axios";
 import { useRef, useState } from "react";
 
-const FileUploadButton = ({ room, userId, userName }) => {
+const FileUploadButton = ({
+  room,
+  userId,
+  userName
+  
+}) => {
   const fileInputRef = useRef();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const handleFileChange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-  
-      // Set preview
-      setSelectedFile(file);
-      setPreviewURL(URL.createObjectURL(file));
-  
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("room", room);
-      formData.append("sender", userId);
-      formData.append("senderName", userName);
-  
-      try {
-        await axios.post("http://localhost:8080/api/chat/upload", formData, {
+    setSelectedFile(file);
+    setPreviewURL(URL.createObjectURL(file));
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("room", room);
+    formData.append("sender", userId);
+    formData.append("senderName", userName);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/chat/upload",
+        formData,
+        {
           headers: { "Content-Type": "multipart/form-data" },
-        });
-        // toast.success("file sended")
-        e.target.value = null;
-      } catch (err) {
-        console.error("File upload error:", err);
-      }
+        }
+      );
+     
+      // Clear preview after upload
+      setSelectedFile(null);
+      setPreviewURL(null);
+      e.target.value = null;
+    } catch (err) {
+      console.error("File upload error:", err);
+    }
   };
-  
 
   const renderPreview = () => {
     if (!selectedFile) return null;

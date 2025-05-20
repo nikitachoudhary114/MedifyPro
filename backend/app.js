@@ -116,7 +116,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on("typing", ({ room, senderName }) => {
-        socket.to(room).emit("typing", senderName);
+        socket.to(room).emit("typing",{ senderName});
     });
       
 
