@@ -3,7 +3,6 @@ import { io } from "socket.io-client";
 import axios from "axios";
 import FileUploadButton from "../components/FileUploadButton";
 
-
 const socket = io("http://localhost:8080");
 
 const ChatWindow = ({ room, userId, userName, onClose }) => {
@@ -16,7 +15,6 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
 
   // Scroll chat to bottom when chat updates
   useEffect(() => {
-    console.log("ChatWindow userId:", userId, "userName:", userName);
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
@@ -35,6 +33,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
 
     socket.on("typing", ({ senderName }) => {
       if (senderName !== userName) {
+        
         setTypingUser(senderName);
         setIsTyping(true);
         const timeout = setTimeout(() => setIsTyping(false), 2000);
@@ -61,8 +60,6 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
       senderName: userName,
     };
 
-    console.log(newMsg)
-
     socket.emit("sendMessage", newMsg);
     setMessage("");
   };
@@ -71,7 +68,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
     <div className="fixed inset-0 bg-white z-50 flex flex-col md:max-w-2xl md:mx-auto md:my-10 md:rounded-2xl md:shadow-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-violet-400 to-violet-500 text-white p-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Chat with Patient</h2>
+        <h2 className="text-xl font-semibold">Chat with Doctor</h2>
         <button
           onClick={onClose}
           className="text-white text-xl hover:scale-110 transition"
@@ -88,7 +85,6 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
         ) : (
           chat.map((msg, idx) => {
             const isCurrentUser = msg.sender === userId;
-            console.log(isCurrentUser)
             return (
               <div
                 key={idx}
@@ -151,10 +147,9 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
           room={room}
           userId={userId}
           userName={userName}
-          // onFileUploaded={(newFileMessage) => {
-          //   // Ensure sender info correct here
-          //   setChat((prev) => [...prev, newFileMessage]);
-          // }}
+          onFileUploaded={(newFileMessage) => {
+            setChat((prev) => [...prev, newFileMessage]);
+          }}
         />
 
         <input

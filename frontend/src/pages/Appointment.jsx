@@ -77,7 +77,7 @@ function parseJwt(token) {
             console.log(response.data)
             setPatId(user.id);
             setPatientName(user.name || "Patient");
-            console.log("appointment userId:", patId, "userName:", patientName);
+            // console.log("appointment userId:", patId, "userName:", patientName);
           } else {
             toast.error("Failed to load profile data");
           }

@@ -3,38 +3,37 @@ import axios from "axios";
 import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const FileUploadButton = ({ room, userId, userName}) => {
+const FileUploadButton = ({ room, userId, userName, onFileUploaded }) => {
   const fileInputRef = useRef();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
 
-   const handleFileChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-    
-        console.log("FileUploadButton userId:", userId, "userName:", userName);
-        // Set preview
-        setSelectedFile(file);
-        setPreviewURL(URL.createObjectURL(file));
-    
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("room", room);
-        formData.append("sender", userId);
-     formData.append("senderName", userName);
-     
-    
-        try {
-          await axios.post("http://localhost:8080/api/chat/upload", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          // toast.success("file sended")
-          e.target.value = null;
-        } catch (err) {
-          console.error("File upload error:", err);
-        }
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // console.log("FileUploadButton userId:", userId, "userName:", userName);
+    // Set preview
+    setSelectedFile(file);
+    setPreviewURL(URL.createObjectURL(file));
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("room", room);
+    formData.append("sender", userId);
+    formData.append("senderName", userName);
+
+    try {
+      await axios.post("http://localhost:8080/api/chat/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      // toast.success("file sended")
+      e.target.value = null;
+    } catch (err) {
+      console.error("File upload error:", err);
+    }
   };
-  
+
   const renderPreview = () => {
     if (!selectedFile) return null;
 

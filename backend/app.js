@@ -47,7 +47,7 @@ app.post('/api/chat/upload', upload.single('file'), async (req, res) => {
         const { room, sender, senderName } = req.body;
 
         if (!req.file) return res.status(400).send("No file uploaded");
-        console.log("request=> ",req);
+        // console.log("request=> ",req);
         const chatMsg = new chatModel({
             room,
             sender,
@@ -63,7 +63,7 @@ app.post('/api/chat/upload', upload.single('file'), async (req, res) => {
         });
 
         await chatMsg.save();
-        console.log(chatMsg.file)
+        // console.log(chatMsg.file)
 
         io.to(room).emit("recievedMessage", {
             sender,

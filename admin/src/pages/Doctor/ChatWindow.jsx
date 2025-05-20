@@ -33,6 +33,7 @@ const ChatWindow = ({ room, userId, userName, onClose }) => {
 
     socket.on("typing", ({ senderName }) => {
       if (senderName !== userName) {
+        
         setTypingUser(senderName);
         setIsTyping(true);
         const timeout = setTimeout(() => setIsTyping(false), 2000);
