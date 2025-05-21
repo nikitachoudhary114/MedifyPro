@@ -13,6 +13,7 @@ import Appointment from "./pages/Appointment";
 import Profile from "./pages/Profile";
 import SignUp from "./pages/SignUp";
 import ChatWindow from "./pages/ChatWindow";
+import VideoCall from "./pages/VideoCall";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -33,9 +34,10 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/appointment" element={<Appointment/> } />
-            <Route path="/profile" element={<Profile/> } />
-           <Route path="/chat" element={<ChatWindow/>}/>
+            <Route path="/appointment" element={<Appointment />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/chat" element={<ChatWindow />} />
+            <Route path="/patient/video-call/:roomID" element={<VideoCall />} />
           </Routes>
         </div>
 

@@ -299,7 +299,6 @@ function parseJwt(token) {
               </div>
 
               {/* Action Buttons */}
-              
 
               <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
                 {appointment.payment ? (
@@ -340,6 +339,15 @@ function parseJwt(token) {
                   }}
                 >
                   Chat with doctor
+                </button>
+
+                <button
+                  className="w-3/4 p-2 bg-violet-300 hover:bg-violet-400 text-white rounded-lg transition-all"
+                  onClick={() => {
+                   navigate(`/patient/video-call/${appointment._id}`);
+                  }}
+                >
+                  Video call with doctor
                 </button>
 
                 <button

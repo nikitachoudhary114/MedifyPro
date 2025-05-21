@@ -14,6 +14,7 @@ import Appointment from './pages/Doctor/Appointment';
 import DoctorList from './pages/Admin/DoctorList';
 import AddDoctor from './pages/Admin/AddDoctor';
 import PatientList from './pages/Admin/PatientList';
+import VideoCall from './pages/Doctor/VideoCall';
 function App() {
   
 
@@ -37,6 +38,8 @@ function App() {
             <Route path="/doctor-list" element={<DoctorList />} />
             <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/patient-list" element={<PatientList />} />
+
+            <Route path="doctor/video-call/:roomID" element={<VideoCall />} />
           </Route>
         </Routes>
       </div>

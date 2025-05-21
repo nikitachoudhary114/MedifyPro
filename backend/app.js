@@ -123,10 +123,48 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log("user Disconnected", socket.id);
     });
+
+    // WebRTC Signaling Events
+    socket.on('join-video-room', (roomId) => {
+        console.log(`Socket ${socket.id} joining video room: ${roomId}`);
+        socket.join(roomId);
+        // Notify others in the room that a new user joined
+        socket.to(roomId).emit('user-joined');
+        console.log(`Notified other users in room ${roomId} about new user ${socket.id}`);
+    });
+
+    socket.on('offer', (data) => {
+        console.log(`Received offer from ${socket.id} for room ${data.roomID}`);
+        socket.to(data.roomID).emit('offer', data.offer);
+        console.log(`Forwarded offer to other users in room ${data.roomID}`);
+    });
+
+    socket.on('answer', (data) => {
+        console.log(`Received answer from ${socket.id} for room ${data.roomID}`);
+        socket.to(data.roomID).emit('answer', data.answer);
+        console.log(`Forwarded answer to other users in room ${data.roomID}`);
+    });
+
+    socket.on('ice-candidate', (data) => {
+        console.log(`Received ICE candidate from ${socket.id} for room ${data.roomID}`);
+        socket.to(data.roomID).emit('ice-candidate', data.candidate);
+        console.log(`Forwarded ICE candidate to other users in room ${data.roomID}`);
+    });
+
+    socket.on("end-call", ({ roomID }) => {
+        console.log(`Call ended in room ${roomID} by ${socket.id}`);
+        socket.to(roomID).emit("end-call");
+    });
+      
+
+
 });
 
-server.listen(8080);
 
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+  
 
 // app.listen(port, () => {
 //     console.log(`Server listening to port ${port}`);

@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { assets } from "../../assets/assets";
 import ChatWindow from "./ChatWindow";
+import { useNavigate } from "react-router-dom";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -21,7 +22,7 @@ const [patientName, setPatientName] = useState("")
 
 
   const [doctorName, setDoctorName] = useState("");
-
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -173,6 +174,9 @@ const [patientName, setPatientName] = useState("")
                 <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
                   Chat
                 </th>
+                <th className="border border-gray-300 px-6 py-3 text-center font-semibold text-gray-700">
+                  Video Call
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -234,6 +238,16 @@ const [patientName, setPatientName] = useState("")
                       }}
                     >
                       Chat
+                    </button>
+                  </td>
+                  <td className="border border-gray-300 px-6 py-3 text-center">
+                    <button
+                      className="px-3 py-1  bg-yellow-400 text-black rounded-full text-sm ml-2"
+                      onClick={() => {
+                        navigate(`/doctor/video-call/${appointment._id}`);
+                      }}
+                    >
+                      Video
                     </button>
                   </td>
                 </tr>

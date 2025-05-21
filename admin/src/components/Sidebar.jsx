@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { assets } from "../assets/assets";
 
 const Sidebar = ({ role, logout }) => {
+  const [open, setOpen] = useState(true);
+
   const doctorLinks = [
     { to: "/doctor/dashboard", icon: assets.home_icon, label: "Dashboard" },
     {
@@ -22,8 +24,29 @@ const Sidebar = ({ role, logout }) => {
 
   const links = role === "doctor" ? doctorLinks : adminLinks;
 
+  // Hide sidebar on small screens if not open
+  if (!open) {
+    return (
+      <button
+        className="fixed top-4 left-4 z-50 bg-indigo-500 text-white p-2 rounded-full shadow-lg lg:hidden"
+        onClick={() => setOpen(true)}
+        aria-label="Open sidebar"
+      >
+        ☰
+      </button>
+    );
+  }
+
   return (
-    <div className="bg-[#d0cff4] w-64 flex flex-col shadow-lg">
+    <div className="bg-[#d0cff4] w-64 flex flex-col shadow-lg fixed md:static h-full z-40">
+      {/* Close button for small screens */}
+      <button
+        className="absolute top-4 right-4 text-2xl text-gray-600 md:hidden"
+        onClick={() => setOpen(false)}
+        aria-label="Close sidebar"
+      >
+        ✕
+      </button>
       {/* Logo Section */}
       <div className="flex flex-col items-center py-6">
         <img src={assets.logo} alt="Logo" className="w-32 mb-2" />
