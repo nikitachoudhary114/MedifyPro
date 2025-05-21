@@ -156,7 +156,12 @@ io.on('connection', (socket) => {
         socket.to(roomID).emit("end-call");
     });
       
-
+    socket.on("toggle-audio", ({ roomID, enabled }) => {
+        socket.to(roomID).emit("remote-toggle-audio", { enabled });
+    });
+    socket.on("toggle-video", ({ roomID, enabled }) => {
+        socket.to(roomID).emit("remote-toggle-video", { enabled });
+      });
 
 });
 

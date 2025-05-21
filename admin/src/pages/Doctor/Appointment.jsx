@@ -54,24 +54,7 @@ const [patientName, setPatientName] = useState("")
   }, [doctorId, token]);
 
 
-  // useEffect(() => {
-  //   const fetchPatientName = async () => {
-  //     const response = await axios.get(
-  //       `http://localhost:8080/api/user/${patientId}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //     setPatientName(response.data.user.name);
-  //     console.log(patientName)
-  //   }
 
-  //   if (patientId) {
-  //     fetchPatientName();
-  //   }
-  // },[patientId,  token])
 
 
   useEffect(() => {
