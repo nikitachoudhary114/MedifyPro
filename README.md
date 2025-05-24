@@ -33,6 +33,8 @@
 | **Deployment**   | vercel |
 
 ---
+#🖼️ Screenshots
+---
 
 ## 📦 Installation & Setup
 
