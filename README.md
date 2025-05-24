@@ -32,9 +32,14 @@
 | **Maps**         | Google Maps API |
 | **Deployment**   | vercel |
 
+
+
 ---
-##🖼️ Screenshots
-![Home Page](https://collection.cloudinary.com/dfpzgw35f/d12dec1091f66c7728fd3c9dcdf18859)
+## 📽️ Project Preview
+Here's a recording showcasing the working of the project:
+🔗 [View Recording](https://drive.google.com/file/d/1Sg9uQNxCQadybtvQRFbA0OAeDVAvTwlx/view?usp=sharing)
+
+
 ---
 
 ## 📦 Installation & Setup
