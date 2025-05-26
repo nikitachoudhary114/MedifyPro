@@ -37,7 +37,7 @@
 ---
 ## 📽️ Project Preview
 Here's a recording showcasing the working of the project:
-🔗 [View Recording](https://drive.google.com/file/d/1Sg9uQNxCQadybtvQRFbA0OAeDVAvTwlx/view?usp=sharing)
+🔗 [View Recording](https://drive.google.com/file/d/1vRnheXZJRMMIgX5egjSzOk22RPW-_Ou8/view?usp=sharing)
 
 
 ---
