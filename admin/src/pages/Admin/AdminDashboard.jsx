@@ -13,7 +13,7 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:8080/api/admin/adminDashboard"
+          "https://medifypro-backend.onrender.com/api/admin/adminDashboard"
         );
         setDashboardData(response.data);
       } catch (error) {

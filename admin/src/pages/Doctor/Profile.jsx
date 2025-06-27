@@ -27,7 +27,7 @@ const Profile = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/doctor/${doctorId}`,
+          `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -59,7 +59,7 @@ const Profile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/doctor/${doctorId}`,
+        `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`,
         formData,
         {
           headers: {
@@ -80,7 +80,7 @@ const Profile = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:8080/api/doctor/${doctorId}/update-password`,
+        `https://medifypro-backend.onrender.com/api/doctor/${doctorId}/update-password`,
         passwordData,
         {
           headers: {
@@ -99,7 +99,7 @@ const Profile = () => {
   const toggleAvailability = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:8080/api/doctor/${doctorId}/available`,
+        `https://medifypro-backend.onrender.com/api/doctor/${doctorId}/available`,
         { isAvailable: !isAvailable },
         {
           headers: {

@@ -178,16 +178,23 @@ const allUsers = async (req, res) => {
 const getSpecificUser = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    if (!userId || userId === "undefined") {
+      return res.status(400).json({ success: false, message: "Invalid userId in request" });
+    }
+
     const user = await userModel.findById(userId);
     if (!user) {
-      res.status(404).json({ message: "No Users Found" });
+      return res.status(404).json({ message: "No Users Found" });
     }
+
     res.status(200).json({ user });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "server error" });
+    console.error("Error in getSpecificUser:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 const deleteUser = async (req, res) => {
   try {

@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 import FileUploadButton from "../../components/FileUploadButton";
 
-const socket = io("http://localhost:8080");
+const socket = io("https://medifypro-backend.onrender.com");
 
 const ChatWindow = ({ room, userId, userName, onClose }) => {
   const [message, setMessage] = useState("");

@@ -23,7 +23,7 @@ const PatientList = () => {
   const fetchPatients = async () => {
     try {
       const response = await axiosInstance.get(
-        "http://localhost:8080/api/user/"
+        "https://medifypro-backend.onrender.com/api/user/"
       );
       setPatients(response.data.users);
       setLoading(false);
@@ -38,7 +38,7 @@ const PatientList = () => {
   const fetchPatientDetails = async (userId) => {
     try {
       const response = await axiosInstance.get(
-        `http://localhost:8080/api/user/${userId}`
+        `https://medifypro-backend.onrender.com/api/user/${userId}`
       );
       setSelectedPatient(response.data.user);
     } catch (error) {
@@ -50,7 +50,9 @@ const PatientList = () => {
   // Delete a patient
   const deletePatient = async (userId) => {
     try {
-      await axiosInstance.delete(`http://localhost:8080/api/user/${userId}`);
+      await axiosInstance.delete(
+        `https://medifypro-backend.onrender.com/api/user/${userId}`
+      );
       toast.success("Patient deleted successfully.");
       setPatients(patients.filter((patient) => patient._id !== userId)); // Remove from UI
     } catch (error) {

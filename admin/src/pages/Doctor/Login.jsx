@@ -17,10 +17,13 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post(`http://localhost:8080/api/doctor/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `https://medifypro-backend.onrender.com/api/doctor/login`,
+        {
+          email,
+          password,
+        }
+      );
       const data = res.data;
       if (data.success) {
         toast.success("Login Success");

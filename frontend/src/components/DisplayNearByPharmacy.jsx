@@ -30,7 +30,7 @@ const DisplayNearByPharmacy = () => {
       const fetchNearbyPlaces = async (lat, lng) => {
         try {
           const { data } = await axios.get(
-            "http://localhost:8080/api/user/nearby-places",
+            "https://medifypro-backend.onrender.com/api/user/nearby-places",
             { params: { latitude: lat, longitude: lng } }
           );
           setNearbyPlaces(data.places);

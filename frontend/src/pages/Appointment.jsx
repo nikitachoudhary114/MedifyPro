@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import DisplayNearByPharmacy from "../components/DisplayNearByPharmacy";
 import ChatWindow from "./ChatWindow";
 import { jwtDecode } from "jwt-decode";
@@ -18,78 +18,72 @@ const Appointment = () => {
   const [newTime, setNewTime] = useState("");
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-// ...existing code...
-const [showChatModal, setShowChatModal] = useState(false);
-const [selectedChatRoom, setSelectedChatRoom] = useState(null);
-// ...existing code...
+  // ...existing code...
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChatRoom, setSelectedChatRoom] = useState(null);
+  // ...existing code...
 
   const [patId, setPatId] = useState();
-  const [patientName, setPatientName] = useState("")
+  const [patientName, setPatientName] = useState("");
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
   const doctorId = decodedToken?.id;
 
-
-// Add this function at the top of your file
-function parseJwt(token) {
-  if (!token) return null;
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    // console.log(jsonPayload)
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    return null;
+  // Add this function at the top of your file
+  function parseJwt(token) {
+    if (!token) return null;
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      // console.log(jsonPayload)
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
   }
-}
 
   useEffect(() => {
-  
-
     fetchAppointments();
   }, []);
 
-
-
-    useEffect(() => {
-      const fetchProfileData = async () => {
-        try {
-          const response = await axios.get(
-            "http://localhost:8080/api/user/profile",
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-  
-          if (response.data.success) {
-            const user = response.data.user;
-            console.log(response.data)
-            setPatId(user.id);
-            setPatientName(user.name || "Patient");
-            // console.log("appointment userId:", patId, "userName:", patientName);
-          } else {
-            toast.error("Failed to load profile data");
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get(
+          "https://medifypro-backend.onrender.com/api/user/profile",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        } catch (error) {
-          console.error("Error fetching profile data:", error);
-          toast.error("An error occurred while fetching the profile data");
-        }
-      };
-  
-      fetchProfileData();
-    }, []);
+        );
 
+        if (response.data.success) {
+          const user = response.data.user;
+          console.log(response.data);
+          setPatId(user.id);
+          setPatientName(user.name || "Patient");
+          // console.log("appointment userId:", patId, "userName:", patientName);
+        } else {
+          toast.error("Failed to load profile data");
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        toast.error("An error occurred while fetching the profile data");
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const [doctorName, setDoctorName] = useState("");
 
@@ -97,34 +91,31 @@ function parseJwt(token) {
     const fetchDoctorName = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/doctor/${doctorId}`,
+          `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        
+
         // setDoctorName(response.data.doctor);
         // console.log(response.data)
         // console.log(doctorId)
       } catch (error) {
         // setDoctorName("Doctor");
-        console.log(error)
+        console.log(error);
       }
     };
 
-    
-      fetchDoctorName();
-    
+    fetchDoctorName();
   }, []);
- 
 
   // Fetch all appointments
   const fetchAppointments = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:8080/api/appointments/user",
+        "https://medifypro-backend.onrender.com/api/appointments/user",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -147,7 +138,7 @@ function parseJwt(token) {
   const deleteAppointment = async (appointmentId) => {
     try {
       const { data } = await axios.delete(
-        `http://localhost:8080/api/appointments/${appointmentId}`,
+        `https://medifypro-backend.onrender.com/api/appointments/${appointmentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -169,7 +160,7 @@ function parseJwt(token) {
   const submitReview = async () => {
     try {
       const { data } = await axios.post(
-        `http://localhost:8080/api/doctor/${selectedDoctorId}/review`,
+        `https://medifypro-backend.onrender.com/api/doctor/${selectedDoctorId}/review`,
         { review, rating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -194,7 +185,7 @@ function parseJwt(token) {
   const updateAppointment = async () => {
     try {
       const { data } = await axios.put(
-        `http://localhost:8080/api/user/${selectedAppointmentId}`,
+        `https://medifypro-backend.onrender.com/api/user/${selectedAppointmentId}`,
         { date: newDate, time: newTime },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -226,7 +217,7 @@ function parseJwt(token) {
       handler: async (response) => {
         try {
           const { data } = await axios.post(
-            `http://localhost:8080/api/user/verify`,
+            `https://medifypro-backend.onrender.com/api/user/verify`,
             response,
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -247,7 +238,7 @@ function parseJwt(token) {
   const appointmentRazorpay = async (appointmentId) => {
     try {
       const { data } = await axios.post(
-        `http://localhost:8080/api/user/payment`,
+        `https://medifypro-backend.onrender.com/api/user/payment`,
         { appointmentId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -344,7 +335,7 @@ function parseJwt(token) {
                 <button
                   className="w-3/4 p-2 bg-violet-300 hover:bg-violet-400 text-white rounded-lg transition-all"
                   onClick={() => {
-                   navigate(`/patient/video-call/${appointment._id}`);
+                    navigate(`/patient/video-call/${appointment._id}`);
                   }}
                 >
                   Video call with doctor

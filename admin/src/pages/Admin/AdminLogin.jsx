@@ -22,7 +22,7 @@ const AdminLogin = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/admin/login",
+        "https://medifypro-backend.onrender.com/api/admin/login",
         formData
       );
       localStorage.setItem("adminToken", response.data.token);

@@ -12,7 +12,7 @@ const DoctorDashboard = () => {
       try {
         const token = localStorage.getItem("token"); // Assuming the doctor token is stored in localStorage
         const response = await axios.post(
-          "http://localhost:8080/api/admin/doctorDashboard",
+          "https://medifypro-backend.onrender.com/api/admin/doctorDashboard",
           {},
           {
             headers: {

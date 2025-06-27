@@ -41,7 +41,7 @@ const handleSubmit = async (e) => {
     });
 
     const response = await axios.post(
-      "http://localhost:8080/api/doctor/add",
+      "https://medifypro-backend.onrender.com/api/doctor/add",
       formDataToSend,
       {
         headers: {

@@ -26,7 +26,7 @@ const fetchDoctors = async () => {
     };
 
     const response = await axios.post(
-      "http://localhost:8080/api/search-filter",
+      "https://medifypro-backend.onrender.com/api/search-filter",
       params
     );
 

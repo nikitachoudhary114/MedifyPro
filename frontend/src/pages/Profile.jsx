@@ -46,7 +46,7 @@ const Profile = () => {
     const fetchProfileData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/user/profile",
+          "https://medifypro-backend.onrender.com/api/user/profile",
           {
             headers: {
               "Content-Type": "application/json",
@@ -86,7 +86,7 @@ const Profile = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:8080/api/user/emergency-contact",
+        "https://medifypro-backend.onrender.com/api/user/emergency-contact",
         {
           name: emergencyName,
           phone: emergencyPhone,
@@ -129,7 +129,7 @@ const Profile = () => {
       formData.append("emergencyPhone", emergencyPhone);
 
       const res = await axios.put(
-        "http://localhost:8080/api/user/profile",
+        "https://medifypro-backend.onrender.com/api/user/profile",
         formData,
         {
           headers: {

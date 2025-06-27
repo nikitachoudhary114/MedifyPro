@@ -20,13 +20,17 @@ const DashboardLayout = () => {
   const logout = async () => {
     try {
       if (role === "doctor") {
-        await axios.post(`http://localhost:8080/api/doctor/logout`);
+        await axios.post(
+          `https://medifypro-backend.onrender.com/api/doctor/logout`
+        );
 
         localStorage.removeItem("token");
          toast.success("Logout Successfully");
         navigate("/");
       } else if (role === "admin") {
-        await axios.post(`http://localhost:8080/api/admin/logout`);
+        await axios.post(
+          `https://medifypro-backend.onrender.com/api/admin/logout`
+        );
         localStorage.removeItem("adminToken");
  toast.success("Logout Successfully");
         navigate("/");

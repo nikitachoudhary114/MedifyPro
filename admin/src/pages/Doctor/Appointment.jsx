@@ -29,7 +29,7 @@ const [patientName, setPatientName] = useState("")
     const fetchAppointments = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/appointments/doctor/${doctorId}`,
+          `https://medifypro-backend.onrender.com/api/appointments/doctor/${doctorId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ const [patientName, setPatientName] = useState("")
       const fetchDoctorName = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8080/api/doctor/${doctorId}`,
+            `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ const [patientName, setPatientName] = useState("")
   const handleViewDetails = async (patientId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/user/${patientId}`,
+        `https://medifypro-backend.onrender.com/api/user/${patientId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

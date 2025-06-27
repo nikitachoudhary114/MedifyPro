@@ -25,7 +25,7 @@ const FileUploadButton = ({ room, userId, userName }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/chat/upload",
+        "https://medifypro-backend.onrender.com/api/chat/upload",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

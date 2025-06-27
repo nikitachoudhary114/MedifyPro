@@ -22,7 +22,7 @@ const DoctorList = () => {
   const fetchDoctors = async () => {
     try {
       const response = await axiosInstance.get(
-        "http://localhost:8080/api/doctor/all"
+        "https://medifypro-backend.onrender.com/api/doctor/all"
       );
       setDoctors(response.data.data);
       setLoading(false);
@@ -37,7 +37,7 @@ const DoctorList = () => {
   const fetchDoctorDetails = async (doctorId) => {
     try {
       const response = await axiosInstance.get(
-        `http://localhost:8080/api/doctor/${doctorId}`
+        `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`
       );
         setSelectedDoctor(response.data.doctor);
         console.log(selectedDoctor)
@@ -51,7 +51,7 @@ const DoctorList = () => {
   const deleteDoctor = async (doctorId) => {
     try {
       await axiosInstance.delete(
-        `http://localhost:8080/api/doctor/${doctorId}`
+        `https://medifypro-backend.onrender.com/api/doctor/${doctorId}`
       );
       toast.success("Doctor deleted successfully.");
       setDoctors(doctors.filter((doctor) => doctor._id !== doctorId)); // Remove from UI

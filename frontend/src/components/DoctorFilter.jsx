@@ -30,7 +30,7 @@ const DoctorFilter = () => {
   const fetchDoctors = async (filters) => {
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/search-filter",
+        "https://medifypro-backend.onrender.com/api/search-filter",
         filters
       );
         setDoctors(response.data.data);

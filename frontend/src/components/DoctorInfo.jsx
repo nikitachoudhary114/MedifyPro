@@ -26,7 +26,7 @@ const DoctorInfo = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:8080/api/doctor/${id}`,
+          `https://medifypro-backend.onrender.com/api/doctor/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -38,7 +38,7 @@ const DoctorInfo = () => {
         setDoctor(doctorData);
 
         const relatedResponse = await axios.get(
-          `http://localhost:8080/api/doctor/all`,
+          `https://medifypro-backend.onrender.com/api/doctor/all`,
           {
             params: { speciality: doctorData.speciality },
             headers: {
@@ -71,7 +71,7 @@ const DoctorInfo = () => {
   const fetchReviewsAndRating = async () => {
     try {
       const reviewsResponse = await axios.get(
-        `http://localhost:8080/api/doctor/${id}/review`,
+        `https://medifypro-backend.onrender.com/api/doctor/${id}/review`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -80,7 +80,7 @@ const DoctorInfo = () => {
       );
 
       const avgRatingResponse = await axios.get(
-        `http://localhost:8080/api/doctor/${id}/average-rating`
+        `https://medifypro-backend.onrender.com/api/doctor/${id}/average-rating`
       );
 
       setReviews(reviewsResponse.data.reviews || []);
@@ -93,7 +93,7 @@ const DoctorInfo = () => {
   const updateReview = async (reviewId) => {
     try {
       const response = await axios.patch(
-        `http://localhost:8080/api/doctor/${id}/review/${reviewId}`,
+        `https://medifypro-backend.onrender.com/api/doctor/${id}/review/${reviewId}`,
         { review: reviewText, rating },
         {
           headers: {
@@ -114,7 +114,7 @@ const DoctorInfo = () => {
   const deleteReview = async (reviewId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:8080/api/doctor/${id}/review/${reviewId}`,
+        `https://medifypro-backend.onrender.com/api/doctor/${id}/review/${reviewId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -208,7 +208,7 @@ const DoctorInfo = () => {
         return;
       }
       const response = await axios.post(
-        "http://localhost:8080/api/appointments/",
+        "https://medifypro-backend.onrender.com/api/appointments/",
         {
           doctorId: id,
           date: selectedDate,

@@ -6,7 +6,7 @@ import { connectDB } from './util/db.js';  // Add .js extension
 import userRouter from './routes/userRoutes.js'; // Import directly
 import doctorRoutes from './routes/doctorRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
-import {  searchAndFilter } from './controller/doctorController.js';
+import { searchAndFilter } from './controller/doctorController.js';
 import adminRoutes from "./routes/adminRoutes.js";
 import './util/cronScheduler.js'
 import http from 'http';
@@ -85,8 +85,8 @@ app.post('/api/chat/upload', upload.single('file'), async (req, res) => {
         res.status(500).send("Upload failed");
     }
 });
-  
-  
+
+
 
 
 
@@ -103,7 +103,7 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on('joinRoom',async ({ room }) => {
+    socket.on('joinRoom', async ({ room }) => {
         socket.join(room);
         const messages = await chatModel.find({ room }).sort({ timeStamp: 1 });
         socket.emit("previousMessages", messages);
@@ -116,9 +116,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on("typing", ({ room, senderName }) => {
-        socket.to(room).emit("typing",{ senderName});
+        socket.to(room).emit("typing", { senderName });
     });
-      
+
 
     socket.on('disconnect', () => {
         console.log("user Disconnected", socket.id);
@@ -155,13 +155,13 @@ io.on('connection', (socket) => {
         console.log(`Call ended in room ${roomID} by ${socket.id}`);
         socket.to(roomID).emit("end-call");
     });
-      
+
     socket.on("toggle-audio", ({ roomID, enabled }) => {
         socket.to(roomID).emit("remote-toggle-audio", { enabled });
     });
     socket.on("toggle-video", ({ roomID, enabled }) => {
         socket.to(roomID).emit("remote-toggle-video", { enabled });
-      });
+    });
 
 });
 
@@ -169,7 +169,7 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-  
+
 
 // app.listen(port, () => {
 //     console.log(`Server listening to port ${port}`);

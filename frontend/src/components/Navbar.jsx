@@ -26,7 +26,7 @@ const Navbar = () => {
       const fetchProfileData = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:8080/api/user/profile",
+            "https://medifypro-backend.onrender.com/api/user/profile",
             {
               headers: {
                 "Content-Type": "application/json",
@@ -77,56 +77,6 @@ const Navbar = () => {
     );
   }
 
-// const handleSOSClick = async () => {
-//   const token = localStorage.getItem("token");
-
-//   if (!token) {
-//     toast.error("Login first to trigger SOS!");
-//     return;
-//   }
-
-//   // Get user's location
-//   if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition(
-//       async (position) => {
-//         const { latitude, longitude } = position.coords;
-
-//         try {
-//           const res = await axios.post(
-//             "http://localhost:8080/api/user/sos-alert", // your backend route
-//             {
-//               message:
-//                 "🚨 SOS ALERT! I need help immediately. Please check on me.",
-//               latitude,
-//               longitude,
-//             },
-//             {
-//               headers: {
-//                 Authorization: `Bearer ${token}`,
-//               },
-//             }
-//           );
-
-//           if (res.data.success) {
-//             toast.success("🚨 SOS triggered! Help is on the way.");
-//           } else {
-//             toast.error(`Failed to send SOS: ${res.data.message}`);
-//           }
-//         } catch (error) {
-//           console.error("Error triggering SOS:", error);
-//           toast.error("Something went wrong while sending SOS.");
-//         }
-//       },
-//       (error) => {
-//         console.error("Error getting location:", error);
-//         toast.error("Failed to get your location.");
-//       }
-//     );
-//   } else {
-//     toast.error("Geolocation is not supported by this browser.");
-//   }
-// };
-
 
 
 
@@ -148,7 +98,7 @@ const handleSOSClick = async () => {
 
         try {
           const res = await axios.post(
-            "http://localhost:8080/api/user/sos-alert",
+            "https://medifypro-backend.onrender.com/api/user/sos-alert",
             {
               message: "🚨 SOS! I need help.",
               latitude,

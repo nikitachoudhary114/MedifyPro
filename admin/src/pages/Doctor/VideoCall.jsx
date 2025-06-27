@@ -3,7 +3,7 @@ import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 
-const socket = io("http://localhost:8080"); // Replace with your backend
+const socket = io("https://medifypro-backend.onrender.com"); // Replace with your backend
 
 const VideoCall = () => {
   const localVideo = useRef();
