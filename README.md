@@ -32,6 +32,14 @@
 | **Maps**         | Google Maps API |
 | **Deployment**   | vercel |
 
+
+
+---
+## 📽️ Project Preview
+Here's a recording showcasing the working of the project:
+🔗 [View Recording](https://drive.google.com/file/d/1vRnheXZJRMMIgX5egjSzOk22RPW-_Ou8/view?usp=sharing)
+
+
 ---
 
 ## 📦 Installation & Setup
@@ -79,7 +87,7 @@
 
 The Emergency SOS module allows users to send real-time SMS alerts with location details to their emergency contacts.
 
-> ⚠️ **Note**: Twilio’s free trial restricts SMS functionality to manually **verified numbers only**. For full-scale testing or production use, upgrading to a paid Twilio account is recommended.
+> ⚠️ **Note**: Twilio’s free trial restricts SMS functionality to manually **verified numbers only**. For full-scale testing or production use, upgrading to a paid Twilio account is recommended, so it may not work on your side unless your number is verified.
 
 ---
 
