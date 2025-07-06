@@ -36,11 +36,7 @@ const Profile = () => {
     setEmergencyContacts(updatedContacts);
   };
 
-  const submitEmergencyContacts = () => {
-    // Handle form submission (e.g., validation, API call)
-    // console.log(emergencyContacts);
-    setShowPopup(false);
-  };
+  
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -78,19 +74,11 @@ const Profile = () => {
     fetchProfileData();
   }, []);
 
-  const submitEmergencyContact = async () => {
-    if (!emergencyName || !emergencyPhone) {
-      toast.warn("Please fill in both name and phone number");
-      return;
-    }
-
+  const submitEmergencyContacts = async () => {
     try {
       const res = await axios.put(
         "https://medifypro-backend.onrender.com/api/user/emergency-contact",
-        {
-          name: emergencyName,
-          phone: emergencyPhone,
-        },
+        { emergencyContacts },
         {
           headers: {
             "Content-Type": "application/json",
@@ -98,20 +86,20 @@ const Profile = () => {
           },
         }
       );
-
+  
       if (res.data.success) {
-        toast.success("Emergency contact added!");
+        toast.success("Emergency contacts updated");
         setShowPopup(false);
-        setEmergencyName("");
-        setEmergencyPhone("");
       } else {
-        toast.error("Failed to add emergency contact");
+        toast.error("Failed to update contacts");
       }
     } catch (err) {
-      console.error("Emergency contact error:", err);
+      console.error("Emergency contact update error:", err);
       toast.error("Something went wrong");
     }
+    setShowPopup(false);
   };
+  
 
   const editProfileData = async () => {
     try {
@@ -125,8 +113,7 @@ const Profile = () => {
       if (image instanceof File) {
         formData.append("image", image);
       }
-      formData.append("emergencyName", emergencyName);
-      formData.append("emergencyPhone", emergencyPhone);
+      
 
       const res = await axios.put(
         "https://medifypro-backend.onrender.com/api/user/profile",

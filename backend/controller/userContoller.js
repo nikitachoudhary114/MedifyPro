@@ -302,12 +302,13 @@ const verifyRazorpay = async (req, res) => {
 
 const addEmergencyContact = async (req, res) => {
   const userId = req.user.id;
-  const { name, phone } = req.body;
+  const { emergencyContacts } = req.body;
 
-  if (!name || !phone) {
-    return res
-      .status(400)
-      .json({ message: "Name and phone number are both required" });
+  if (!Array.isArray(emergencyContacts) || emergencyContacts.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "At least one emergency contact is required",
+    });
   }
 
   try {
@@ -315,7 +316,7 @@ const addEmergencyContact = async (req, res) => {
       userId,
       {
         $push: {
-          emergencyContacts: { name, phone },
+          emergencyContacts: { $each: emergencyContacts },
         },
       },
       { new: true }
@@ -329,14 +330,17 @@ const addEmergencyContact = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Emergency contact added successfully!",
+      message: "Emergency contacts added successfully!",
       emergencyContacts: user.emergencyContacts,
     });
   } catch (error) {
-    console.error("Error adding emergency contact:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error adding emergency contacts:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while adding contacts" });
   }
 };
+
 
 
 
