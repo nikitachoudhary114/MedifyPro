@@ -1,7 +1,11 @@
-# 🏥 MedifyPro – Smart Healthcare Management System
+#🏥 MedifyPro – A Full-Stack Smart Healthcare Management System
 
 **MedifyPro** is an advanced MERN-stack healthcare platform that streamlines doctor appointment booking, real-time consultations, emergency SOS services, and health management. It integrates secure payments, live chat, video calls, and location-based services, offering a comprehensive digital healthcare solution.
 
+---
+
++ 🔐 Admin Dashboard (login required): https://medify-pro-admin.vercel.app/
+  
 ---
 
 ## 🚀 Key Features
@@ -14,6 +18,15 @@
 - 💳 **Secure Payment Gateway Integration** (Razorpay)
 - 🧑‍⚕️ **Admin Dashboard** for Managing Doctors, Users & Analytics
 - 🗺️ **Google Maps Integration** for Nearby Pharmacies & Diagnostic Labs
+
+---
+
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Node](https://img.shields.io/badge/Backend-Node.js-green)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB-brightgreen)
+![Twilio](https://img.shields.io/badge/SMS-Twilio-red)
+![Deployment](https://img.shields.io/badge/Deployed-Vercel%20%7C%20Render-purple)
+
 
 ---
 
@@ -30,13 +43,13 @@
 | **Real-Time**    | Socket.io |
 | **Video Calls**  | WebRTC |
 | **Maps**         | Google Maps API |
-| **Deployment**   | vercel |
+| **Deployment**   | Vercel |
 
 
 
 ---
 ## 📽️ Project Preview
-Here's a recording showcasing the working of the project:
+ Watch a demo walkthrough of the entire system:
 🔗 [View Recording](https://drive.google.com/file/d/1vRnheXZJRMMIgX5egjSzOk22RPW-_Ou8/view?usp=sharing)
 
 
