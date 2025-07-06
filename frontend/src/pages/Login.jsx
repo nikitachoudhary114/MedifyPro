@@ -13,7 +13,10 @@ const navigate = useNavigate();
     try {
       const res = await axios.post(
         `https://medifypro-backend.onrender.com/api/user/login`,
-        { email, password }
+        {
+          email,
+          password,
+        }
       );
       const data = res.data;
       if (data.success) {

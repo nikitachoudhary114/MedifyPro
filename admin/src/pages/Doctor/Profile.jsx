@@ -108,6 +108,7 @@ const Profile = () => {
         }
       );
       setIsAvailable(response.data.isAvailable);
+      console.log(response.data)
       toast.success(
         `Availability updated to ${
           response.data.isAvailable ? "Available" : "Not Available"

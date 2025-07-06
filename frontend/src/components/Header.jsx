@@ -10,6 +10,7 @@ const Header = () => {
 
   return (
     <div className="px-4">
+     
       <div className="w-full h-auto mt-8  rounded-2xl bg-custom-bg flex flex-col md:flex-row justify-center items-center ">
         {/* Left Section */}
         <div className="text-center md:text-left sm:py-8">

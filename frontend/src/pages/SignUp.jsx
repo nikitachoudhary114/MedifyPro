@@ -20,6 +20,7 @@ const SignUp = () => {
             password,
           }
         );
+      // console.log( VITE_BACKEND_URL );
       const data = res.data;
       if (data.success) {
         toast.success("User Created Successfully");
