@@ -1,4 +1,4 @@
-### 🏥 MedifyPro – A Full-Stack Smart Healthcare Management System
+## 🏥 MedifyPro – A Full-Stack Smart Healthcare Management System
 
 **MedifyPro** is an advanced MERN-stack healthcare platform that streamlines doctor appointment booking, real-time consultations, emergency SOS services, and health management. It integrates secure payments, live chat, video calls, and location-based services, offering a comprehensive digital healthcare solution.
 
