@@ -309,7 +309,7 @@ const DoctorInfo = () => {
           </div>
           <div>
             <h2 className="text-lg font-medium">
-              Appointment Fee: <strong>${doctor.fees}</strong>
+              Appointment Fee: <strong>{doctor.fees}</strong>
             </h2>
           </div>
         </div>
