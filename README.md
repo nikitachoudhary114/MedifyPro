@@ -4,11 +4,11 @@
 
 ---
 
-+ 🔐 Admin Dashboard (login required): https://medify-pro-admin.vercel.app/
+🔐 Admin Dashboard (login required): https://medify-pro-admin.vercel.app/
 + email:- admin@gmail.com
 + password:- choudhary123
 
-+ 🔐 doctor dashboard
+🔐 doctor dashboard
 + email:- amit@gmail.com
 + password:- choudhary123
   
