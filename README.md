@@ -5,6 +5,8 @@
 ---
 
 + 🔐 Admin Dashboard (login required): https://medify-pro-admin.vercel.app/
++ email:- admin@gmail.com
++ password:- choudhary123
   
 ---
 
