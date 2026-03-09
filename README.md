@@ -8,7 +8,7 @@
 + email:- admin@gmail.com
 + password:- choudhary123
 
-+ doctor dashboard
++ 🔐 doctor dashboard
 + email:- amit@gmail.com
 + password:- choudhary123
   
