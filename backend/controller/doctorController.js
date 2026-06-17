@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 
 import appointmentModel from "../model/appointmentModel.js";
 
-
 const getAllDoctors = async (req, res) => {
   try {
     const { speciality } = req.query;
@@ -19,14 +18,14 @@ const getAllDoctors = async (req, res) => {
     res.json({ success: true, data: doctors });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Error in fetching doctor's data" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error in fetching doctor's data" });
   }
 };
 
 const addDoctor = async (req, res) => {
   try {
-
-
     const {
       name,
       email,
@@ -42,38 +41,45 @@ const addDoctor = async (req, res) => {
     } = req.body;
 
     if (
-      !name || !email || !password || !speciality ||
-      !phone || !address || !fees || !degree || !experience ||
-      !about || !timing
+      !name ||
+      !email ||
+      !password ||
+      !speciality ||
+      !phone ||
+      !address ||
+      !fees ||
+      !degree ||
+      !experience ||
+      !about ||
+      !timing
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const existingDoctor = await doctorModel.findOne({ email });
     if (existingDoctor) {
-      return res.status(400).json({ message: "Doctor with this email already exists." });
+      return res
+        .status(400)
+        .json({ message: "Doctor with this email already exists." });
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Check if an image was uploaded
     // const imageUrl = req.file ? req.file.path : null;
 
     if (!req.file) {
-      return res.status(400).json({ message: "Image upload failed. Please upload an image." });
+      return res
+        .status(400)
+        .json({ message: "Image upload failed. Please upload an image." });
     }
 
     const imageUrl = req.file.path; // Cloudinary URL
     console.log("Image URL:", imageUrl);
 
-
-
     // Create doctor
     const newDoctor = new doctorModel({
       name,
       email,
-      password: hashedPassword,
+      password,
       speciality,
       phone,
       address,
@@ -97,7 +103,6 @@ const addDoctor = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 
 const getDocById = async (req, res) => {
   try {
@@ -155,19 +160,15 @@ const updateDoctorAvailabity = async (req, res) => {
 
     await doc.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Doctor availability updated successfully",
-        isAvailable: doc.availability,
-      });
+    res.status(200).json({
+      message: "Doctor availability updated successfully",
+      isAvailable: doc.availability,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error", error });
   }
 };
-
-
 
 const getDoctorAvailability = async (req, res) => {
   try {
@@ -177,7 +178,9 @@ const getDoctorAvailability = async (req, res) => {
     const doctor = await doctorModel.findById(doctorId);
 
     if (!doctor) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
 
     const [startTime, endTime] = doctor.timing.split(" to "); // Assuming timing is stored as "9:00 AM to 3:00 PM"
@@ -189,8 +192,12 @@ const getDoctorAvailability = async (req, res) => {
       date: new Date(date),
     });
 
-    const bookedSlots = bookedAppointments.map((appointment) => appointment.time);
-    const filteredSlots = availableSlots.filter((slot) => !bookedSlots.includes(slot));
+    const bookedSlots = bookedAppointments.map(
+      (appointment) => appointment.time,
+    );
+    const filteredSlots = availableSlots.filter(
+      (slot) => !bookedSlots.includes(slot),
+    );
 
     res.status(200).json({ success: true, availableSlots: filteredSlots });
   } catch (error) {
@@ -200,32 +207,38 @@ const getDoctorAvailability = async (req, res) => {
 };
 
 const changeDoctorPassword = async (req, res) => {
-  const { doctorId } = req.params;
-  const { currentPassword, newPassword } = req.body;
+  const { doctorId, newPassword } = req.body;
 
   try {
+    // Validate input
+    if (!doctorId || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Doctor ID and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 6 characters long" });
+    }
+
     const doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // Check if the current password is correct
-    const isMatch = await bcrypt.compare(currentPassword, doctor.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
-    }
-
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    doctor.password = await bcrypt.hash(newPassword, salt);
-
+    // Update password - markModified ensures pre-save hook runs
+    doctor.password = newPassword;
+    doctor.markModified("password");
     await doctor.save();
+
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
-}
+};
 
 const addReview = async (req, res) => {
   try {
@@ -240,7 +253,7 @@ const addReview = async (req, res) => {
     }
     // Check if the user has already added a review
     const existingReview = doctor.reviews.find(
-      (rev) => rev.userId.toString() === userId
+      (rev) => rev.userId.toString() === userId,
     );
     if (existingReview) {
       return res
@@ -323,7 +336,7 @@ const deleteReview = async (req, res) => {
 
     const initialReviewCount = doctor.reviews.length;
     doctor.reviews = doctor.reviews.filter(
-      (rev) => rev._id.toString() !== reviewId
+      (rev) => rev._id.toString() !== reviewId,
     );
 
     if (doctor.reviews.length === initialReviewCount) {
@@ -354,7 +367,7 @@ const avgRating = async (req, res) => {
 
     const totalRating = doctor.reviews.reduce(
       (sum, review) => sum + review.rating,
-      0
+      0,
     );
     const averageRating = totalRating / doctor.reviews.length;
 
@@ -396,7 +409,7 @@ const searchAndFilter = async (req, res) => {
     // Filter by availability
     if (availability === "true") {
       query.availability = true;
-    }// Available Now
+    } // Available Now
     // } else if (availability === "false") {
     //   query.availability = false; // Not Available
     // }
@@ -445,12 +458,10 @@ const signUp = async (req, res) => {
     const exists = await doctorModel.findOne({ email });
 
     if (exists) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "Doctor already exists with this email"
-        });
+      return res.status(409).json({
+        success: false,
+        message: "Doctor already exists with this email",
+      });
     }
 
     if (!validator.isEmail(email)) {
@@ -465,20 +476,18 @@ const signUp = async (req, res) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const newDoctor = new doctorModel({
       name: name,
       email: email,
-      password: hashedPassword
+      password: password,
     });
 
     const doctor = await newDoctor.save();
     const token = createToken(doctor._id);
 
-    res.status(200).json({ success: true, message: "Doctor registered", token })
-
+    res
+      .status(200)
+      .json({ success: true, message: "Doctor registered", token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Error" });
@@ -492,22 +501,23 @@ const login = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({
         success: false,
-        message: "Doctor does not exist"
-      })
+        message: "Doctor does not exist",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, doctor.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Invalid Credentials" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Credentials" });
     }
 
     const token = createToken(doctor._id);
-    res.status(200).json({ success: true, message: "Login Successful", token })
+    res.status(200).json({ success: true, message: "Login Successful", token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Error" });
   }
-
 };
 
 const logout = async (req, res) => {
@@ -535,5 +545,5 @@ export {
   signUp,
   login,
   logout,
-  changeDoctorPassword
+  changeDoctorPassword,
 };
