@@ -1,11 +1,24 @@
-# MedifyPro — Smart Healthcare Management System
+# 🏥 MedifyPro — A Full-Stack Smart Healthcare Management System
 
 **MedifyPro** is a full-stack digital healthcare platform that connects patients with doctors for appointment booking, online payments, real-time chat, video consultations, emergency SOS alerts, and location-based health services. The system is split into three applications — a patient-facing web app, a doctor/admin dashboard, and a shared REST + WebSocket API.
 
 ---
 
+## Live Demo
+
+**Admin Dashboard:** [https://medify-pro-admin.vercel.app/](https://medify-pro-admin.vercel.app/)
+- Email: `admin@gmail.com`
+- Password: `choudhary123`
+
+**Doctor Dashboard** (same panel):
+- Email: `amit@gmail.com`
+- Password: `choudhary123`
+
+---
+
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Overview](#overview)
 - [System Architecture](#system-architecture)
 - [User Roles & Features](#user-roles--features)
